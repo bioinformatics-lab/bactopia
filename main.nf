@@ -1,6 +1,6 @@
 #! /usr/bin/env nextflow
 // Enabling DSL2
-nextflow.enable.dsl=2
+// nextflow.enable.dsl=2
 
 import groovy.json.JsonSlurper
 import groovy.text.SimpleTemplateEngine
@@ -77,6 +77,8 @@ process gather_fastqs {
     file "bactopia.versions" optional true
     file "multiple-read-sets-merged.txt" optional true
 
+    stub:
+    
     shell:
     bactopia_version = VERSION
     nextflow_version = nextflow.version
