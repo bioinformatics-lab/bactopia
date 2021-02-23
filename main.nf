@@ -77,16 +77,6 @@ process gather_fastqs {
     file "bactopia.versions" optional true
     file "multiple-read-sets-merged.txt" optional true
 
-    stub:
-    """
-    mkdir fastqs
-    mkdir extra
-    touch /*-error.txt
-    touch /fastqs/${sample}*.fastq.gz
-    touch /extra/*.gz
-    """
-
-
     shell:
     bactopia_version = VERSION
     nextflow_version = nextflow.version
@@ -120,6 +110,15 @@ process gather_fastqs {
         final_sample_type = 'single-end'
     }
     template(task.ext.template)
+    
+    stub:
+    """
+    mkdir fastqs
+    mkdir extra
+    touch /*-error.txt
+    touch /fastqs/${sample}*.fastq.gz
+    touch /extra/*.gz
+    """
 }
 
 process fastq_status {
