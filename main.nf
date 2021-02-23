@@ -118,6 +118,9 @@ process gather_fastqs {
     touch /*-error.txt
     touch /fastqs/${sample}*.fastq.gz
     touch /extra/*.gz
+    touch ${task.process}/*
+    touch bactopia.versions
+    touch multiple-read-sets-merged.txt
     """
 }
 
@@ -139,6 +142,13 @@ process fastq_status {
     single_end = fq[1] == null ? true : false
     qin = sample_type.startsWith('assembly') ? 'qin=33' : 'qin=auto'
     template(task.ext.template)
+
+    stub:
+    """
+    touch *-error.txt
+    touch fastqs/${sample}*.fastq.gz
+    touch ${task.process}/*
+    """
 }
 
 process estimate_genome_size {
@@ -161,6 +171,14 @@ process estimate_genome_size {
     shell:
     genome_size = SPECIES_GENOME_SIZE
     template(task.ext.template)
+
+    stub:
+    """
+    touch ${sample}-genome-size-error.txt
+    touch ${sample}-genome-size.txt
+    touch fastqs/${sample}*.fastq.gz
+    touch ${task.process}/
+    """
 }
 
 process qc_reads {
