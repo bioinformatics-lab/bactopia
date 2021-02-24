@@ -1,6 +1,4 @@
 #! /usr/bin/env nextflow
-// Enabling DSL2
-// nextflow.enable.dsl=2
 
 import groovy.json.JsonSlurper
 import groovy.text.SimpleTemplateEngine
