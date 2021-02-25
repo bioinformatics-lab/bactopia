@@ -114,10 +114,10 @@ process gather_fastqs {
     mkdir fastqs
     mkdir extra
     mkdir ${task.process}
-    touch /*-error.txt
-    touch /fastqs/${sample}*.fastq.gz
-    touch /extra/*.gz
-    touch /${task.process}/*
+    touch *-error.txt
+    touch fastqs/${sample}*.fastq.gz
+    touch extra/*.gz
+    touch ${task.process}/*
     touch bactopia.versions
     touch multiple-read-sets-merged.txt
     """
@@ -148,7 +148,7 @@ process fastq_status {
     mkdir fastqs
     touch *-error.txt
     touch fastqs/${sample}*.fastq.gz
-    touch /${task.process}/*
+    touch ${task.process}/*
     """
 }
 
@@ -180,7 +180,7 @@ process estimate_genome_size {
     touch ${sample}-genome-size-error.txt
     touch ${sample}-genome-size.txt
     touch fastqs/${sample}*.fastq.gz
-    touch /${task.process}/*
+    touch ${task.process}/*
     """
 }
 
@@ -227,7 +227,7 @@ process qc_reads {
     touch quality-control/${sample}*.fastq.gz
     touch quality-control/${sample}*.fastq.gz
     touch quality-control/${sample}*.error-fq.gz
-    touch /${task.process}/*
+    touch ${task.process}/*
     """
 }
 
@@ -252,8 +252,8 @@ process qc_original_summary {
     """
     mkdir quality-control
     mkdir ${task.process}
-    touch /quality-control/*
-    touch /${task.process}/*
+    touch quality-control/*
+    touch ${task.process}/*
     """
 }
 
@@ -278,8 +278,8 @@ process qc_final_summary {
     """
     mkdir quality-control
     mkdir ${task.process}
-    touch /quality-control/*
-    touch /${task.process}/*
+    touch quality-control/*
+    touch ${task.process}/*
     """
 }
 
@@ -327,11 +327,11 @@ process assemble_genome {
     mkdir ${task.process}
     touch total_contigs_*
     touch ${sample}-assembly-error.txt
-    touch /fastqs/${sample}*.fastq.gz
-    touch /assembly/*
-    touch /assembly/${sample}.fna
-    touch /assembly/${sample}.fna.gz
-    touch /${task.process}/*
+    touch fastqs/${sample}*.fastq.gz
+    touch assembly/*
+    touch assembly/${sample}.fna
+    touch assembly/${sample}.fna.gz
+    touch ${task.process}/*
     """
 }
 
