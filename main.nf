@@ -113,10 +113,11 @@ process gather_fastqs {
     """
     mkdir fastqs
     mkdir extra
+    mkdir ${task.process}
     touch /*-error.txt
     touch /fastqs/${sample}*.fastq.gz
     touch /extra/*.gz
-    touch ${task.process}/*
+    touch /${task.process}/*
     touch bactopia.versions
     touch multiple-read-sets-merged.txt
     """
@@ -143,9 +144,11 @@ process fastq_status {
 
     stub:
     """
+    mkdir ${task.process}
+    mkdir fastqs
     touch *-error.txt
     touch fastqs/${sample}*.fastq.gz
-    touch ${task.process}/*
+    touch /${task.process}/*
     """
 }
 
@@ -172,10 +175,12 @@ process estimate_genome_size {
 
     stub:
     """
+    mkdir fastqs
+    mkdir ${task.process}
     touch ${sample}-genome-size-error.txt
     touch ${sample}-genome-size.txt
     touch fastqs/${sample}*.fastq.gz
-    touch ${task.process}/
+    touch /${task.process}/*
     """
 }
 
@@ -213,6 +218,17 @@ process qc_reads {
     adapters = params.adapters ? file(params.adapters) : 'adapters'
     phix = params.phix ? file(params.phix) : 'phix'
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir quality-control
+    mkdir ${task.process}
+    touch *-error.txt
+    touch quality-control/${sample}*.fastq.gz
+    touch quality-control/${sample}*.fastq.gz
+    touch quality-control/${sample}*.error-fq.gz
+    touch /${task.process}/*
+    """
 }
 
 process qc_original_summary {
@@ -231,6 +247,14 @@ process qc_original_summary {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir quality-control
+    mkdir ${task.process}
+    touch /quality-control/*
+    touch /${task.process}/*
+    """
 }
 
 process qc_final_summary {
@@ -249,6 +273,14 @@ process qc_final_summary {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir quality-control
+    mkdir ${task.process}
+    touch /quality-control/*
+    touch /${task.process}/*
+    """
 }
 
 
@@ -287,6 +319,20 @@ process assemble_genome {
         use_original_assembly = params.reassemble ? false : true
     }
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir assembly
+    mkdir fastqs
+    mkdir ${task.process}
+    touch total_contigs_*
+    touch ${sample}-assembly-error.txt
+    touch /fastqs/${sample}*.fastq.gz
+    touch /assembly/*
+    touch /assembly/${sample}.fna
+    touch /assembly/${sample}.fna.gz
+    touch /${task.process}/*
+    """
 }
 
 process assembly_qc {
