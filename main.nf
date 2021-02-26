@@ -115,7 +115,7 @@ process gather_fastqs {
     mkdir extra
     mkdir ${task.process}
     touch *-error.txt
-    touch fastqs/${sample}*.fastq.gz
+    touch fastqs/${sample}.fastq.gz
     touch extra/*.gz
     touch ${task.process}/*
     touch bactopia.versions
@@ -147,7 +147,7 @@ process fastq_status {
     mkdir ${task.process}
     mkdir fastqs
     touch *-error.txt
-    touch fastqs/${sample}*.fastq.gz
+    touch fastqs/${sample}.fastq.gz
     touch ${task.process}/*
     """
 }
@@ -179,7 +179,7 @@ process estimate_genome_size {
     mkdir ${task.process}
     touch ${sample}-genome-size-error.txt
     touch ${sample}-genome-size.txt
-    touch fastqs/${sample}*.fastq.gz
+    touch fastqs/${sample}.fastq.gz
     touch ${task.process}/*
     """
 }
@@ -224,9 +224,9 @@ process qc_reads {
     mkdir quality-control
     mkdir ${task.process}
     touch *-error.txt
-    touch quality-control/${sample}*.fastq.gz
-    touch quality-control/${sample}*.fastq.gz
-    touch quality-control/${sample}*.error-fq.gz
+    touch quality-control/${sample}.fastq.gz
+    touch quality-control/${sample}.fastq.gz
+    touch quality-control/${sample}.error-fq.gz
     touch ${task.process}/*
     """
 }
@@ -327,7 +327,7 @@ process assemble_genome {
     mkdir ${task.process}
     touch total_contigs_*
     touch ${sample}-assembly-error.txt
-    touch fastqs/${sample}*.fastq.gz
+    touch fastqs/${sample}.fastq.gz
     touch assembly/*
     touch assembly/${sample}.fna
     touch assembly/${sample}.fna.gz
@@ -362,6 +362,14 @@ process assembly_qc {
     skip_pseudogene_correction = params.skip_pseudogene_correction ? '--skip_pseudogene_correction' : ''
     ignore_thresholds = params.ignore_thresholds ? '--ignore_thresholds' : ''
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${method}
+    mkdir ${task.process}
+    touch ${method}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -382,6 +390,14 @@ process make_blastdb {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir blastdb
+    mkdir ${task.process}
+    touch blastdb/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -445,6 +461,16 @@ process annotate_genome {
     rnammer = params.rnammer ? "--rnammer" : ""
     rfam = params.rnammer ? "--rfam" : ""
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir annotation
+    mkdir ${task.process}
+    touch annotation/${sample}*
+    touch annotation/${sample}.ffn
+    touch annotation/${sample}.ffn.gz
+    touch "${task.process}/*"
+    """
 }
 
 
@@ -465,6 +491,13 @@ process count_31mers {
     shell:
     m = task.memory.toString().split(' ')[0].toInteger() * 1000 - 500
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    touch ${sample}.ctx
+    touch ${task.process}/*
+    """
 }
 
 
@@ -494,6 +527,14 @@ process sequence_type {
     noclean = params.ariba_no_clean ? "--noclean" : ""
     spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${method}
+    mkdir ${task.process}
+    touch ${method}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -521,6 +562,14 @@ process ariba_analysis {
     spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
     noclean = params.ariba_no_clean ? "--noclean" : ""
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${dataset_name}
+    mkdir ${task.process}
+    touch ${dataset_name}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -546,6 +595,17 @@ process minmer_sketch {
     shell:
     fastq = single_end ? fq[0] : "${fq[0]} ${fq[1]}"
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir fastqs
+    mkdir ${task.process}
+    touch fastqs/${sample}.fastq.gz
+    touch ${task.process}/*
+    touch ${sample}.msh
+    touch ${sample}-k31.sig
+
+    """
 }
 
 
