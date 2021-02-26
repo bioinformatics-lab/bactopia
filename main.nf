@@ -635,6 +635,13 @@ process minmer_query {
     mash_w = params.screen_w ? "-w" : ""
     fastq = single_end ? fq[0] : "${fq[0]} ${fq[1]}"
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    touch *.txt
+    touch ${task.process}/*
+    """
 }
 
 
@@ -666,6 +673,14 @@ process call_variants {
     bwaopt = params.bwaopt ? "--bwaopt 'params.bwaopt'" : ""
     fbopt = params.fbopt ? "--fbopt 'params.fbopt'" : ""
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${reference_name}
+    mkdir ${task.process}
+    touch ${reference_name}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -699,6 +714,17 @@ process download_references {
     tie_break = params.random_tie_break ? "--random_tie_break" : ""
     total = params.max_references
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir fastqs
+    mkdir genbank
+    mkdir ${task.process}
+    touch fastqs/${sample}.fastq.gz
+    touch genbank/*.gbk
+    touch ${task.process}/*
+    touch mash-dist.txt
+    """
 }
 
 
@@ -726,6 +752,14 @@ process call_variants_auto {
     bwaopt = params.bwaopt ? "--bwaopt 'params.bwaopt'" : ""
     fbopt = params.fbopt ? "--fbopt 'params.fbopt'" : ""
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${reference_name}
+    mkdir ${task.process}
+    touch ${reference_name}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -758,6 +792,14 @@ process antimicrobial_resistance {
         organism_protein = "-O ${params.amr_organism} --point_mut_all ${amrdir}/${sample}-protein-point-mutations.txt"
     }
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${amrdir}
+    mkdir logs
+    touch ${amrdir}/*
+    touch logs/*
+    """
 }
 
 
@@ -785,6 +827,14 @@ process plasmid_blast {
     gunzip_genes = genes.getName().replace('.gz', '')
     blastdb = blastdb_files[0].getBaseName()
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    touch ${task.process}/*
+    touch ${sample}-plsdb.json
+    touch ${sample}-plsdb.json.gz
+    """
 }
 
 
@@ -810,6 +860,15 @@ process blast_genes {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    mkdir genes
+    touch ${task.process}/*
+    touch genes/*.json
+    touch genes/*.json.gz
+    """
 }
 
 process blast_primers {
@@ -834,6 +893,15 @@ process blast_primers {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    mkdir primers
+    touch ${task.process}/*
+    touch primers/*.json
+    touch primers/*.json.gz
+    """
 }
 
 process blast_proteins {
@@ -858,6 +926,16 @@ process blast_proteins {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    mkdir proteins
+    touch ${task.process}/*
+    touch proteins/*.json
+    touch proteins/*.json.gz
+    """
+
 }
 
 
@@ -887,6 +965,14 @@ process mapping_query {
     bwa_samse_opts = params.bwa_samse_opts ? params.bwa_samse_opts : ""
     bwa_sampe_opts = params.bwa_sampe_opts ? params.bwa_sampe_opts : ""
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    mkdir mapping
+    touch ${task.process}/*
+    touch mapping/*
+    """
 }
 
 
