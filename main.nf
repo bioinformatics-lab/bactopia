@@ -935,7 +935,6 @@ process blast_proteins {
     touch proteins/*.json
     touch proteins/*.json.gz
     """
-
 }
 
 
