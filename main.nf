@@ -602,8 +602,8 @@ process minmer_sketch {
     mkdir ${task.process}
     touch fastqs/${sample}.fastq.gz
     touch ${task.process}/*
-    touch ${sample}.msh
-    touch ${sample}-k31.sig
+    touch ${sample}.sig
+    touch ${sample}-k31.msh
 
     """
 }
