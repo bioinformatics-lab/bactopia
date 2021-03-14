@@ -1,6 +1,4 @@
 #! /usr/bin/env nextflow
-// Enabling DSL2
-nextflow.enable.dsl=2
 
 import groovy.json.JsonSlurper
 import groovy.text.SimpleTemplateEngine
@@ -110,6 +108,19 @@ process gather_fastqs {
         final_sample_type = 'single-end'
     }
     template(task.ext.template)
+    
+    stub:
+    """
+    mkdir fastqs
+    mkdir extra
+    mkdir ${task.process}
+    touch *-error.txt
+    touch fastqs/${sample}.fastq.gz
+    touch extra/*.gz
+    touch ${task.process}/*
+    touch bactopia.versions
+    touch multiple-read-sets-merged.txt
+    """
 }
 
 process fastq_status {
@@ -130,6 +141,15 @@ process fastq_status {
     single_end = fq[1] == null ? true : false
     qin = sample_type.startsWith('assembly') ? 'qin=33' : 'qin=auto'
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    mkdir fastqs
+    touch *-error.txt
+    touch fastqs/${sample}.fastq.gz
+    touch ${task.process}/*
+    """
 }
 
 process estimate_genome_size {
@@ -152,6 +172,16 @@ process estimate_genome_size {
     shell:
     genome_size = SPECIES_GENOME_SIZE
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir fastqs
+    mkdir ${task.process}
+    touch ${sample}-genome-size-error.txt
+    touch ${sample}-genome-size.txt
+    touch fastqs/${sample}.fastq.gz
+    touch ${task.process}/*
+    """
 }
 
 process qc_reads {
@@ -188,6 +218,16 @@ process qc_reads {
     adapters = params.adapters ? file(params.adapters) : 'adapters'
     phix = params.phix ? file(params.phix) : 'phix'
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir quality-control
+    mkdir ${task.process}
+    touch *-error.txt
+    touch quality-control/${sample}.fastq.gz
+    touch quality-control/${sample}.error-fq.gz
+    touch ${task.process}/*
+    """
 }
 
 process qc_original_summary {
@@ -206,6 +246,14 @@ process qc_original_summary {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir quality-control
+    mkdir ${task.process}
+    touch quality-control/*
+    touch ${task.process}/*
+    """
 }
 
 process qc_final_summary {
@@ -224,6 +272,14 @@ process qc_final_summary {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir quality-control
+    mkdir ${task.process}
+    touch quality-control/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -262,6 +318,20 @@ process assemble_genome {
         use_original_assembly = params.reassemble ? false : true
     }
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir assembly
+    mkdir fastqs
+    mkdir ${task.process}
+    touch total_contigs_*
+    touch ${sample}-assembly-error.txt
+    touch fastqs/${sample}.fastq.gz
+    touch assembly/*
+    touch assembly/${sample}.fna
+    touch assembly/${sample}.fna.gz
+    touch ${task.process}/*
+    """
 }
 
 process assembly_qc {
@@ -291,6 +361,14 @@ process assembly_qc {
     skip_pseudogene_correction = params.skip_pseudogene_correction ? '--skip_pseudogene_correction' : ''
     ignore_thresholds = params.ignore_thresholds ? '--ignore_thresholds' : ''
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${method}
+    mkdir ${task.process}
+    touch ${method}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -311,6 +389,14 @@ process make_blastdb {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir blastdb
+    mkdir ${task.process}
+    touch blastdb/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -374,6 +460,18 @@ process annotate_genome {
     rnammer = params.rnammer ? "--rnammer" : ""
     rfam = params.rnammer ? "--rfam" : ""
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir annotation
+    mkdir ${task.process}
+    touch annotation/${sample}*
+    touch annotation/${sample}.ffn
+    touch annotation/${sample}.ffn.gz
+    touch annotation/${sample}.faa
+    touch annotation/${sample}.faa.gz
+    touch "${task.process}/*"
+    """
 }
 
 
@@ -394,6 +492,13 @@ process count_31mers {
     shell:
     m = task.memory.toString().split(' ')[0].toInteger() * 1000 - 500
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    touch ${sample}.ctx
+    touch ${task.process}/*
+    """
 }
 
 
@@ -423,6 +528,17 @@ process sequence_type {
     noclean = params.ariba_no_clean ? "--noclean" : ""
     spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
     template(task.ext.template)
+
+    stub:
+    method = dataset =~ /.*blastdb.*/ ? 'blast' : 'ariba'
+    dataset_tarball = file(dataset).getName()
+    schema = dataset_tarball.split('-')[0]
+    """
+    mkdir ${method}
+    mkdir ${task.process}
+    touch ${method}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -450,6 +566,16 @@ process ariba_analysis {
     spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
     noclean = params.ariba_no_clean ? "--noclean" : ""
     template(task.ext.template)
+
+    stub:
+    dataset_tarball = file(dataset).getName()
+    dataset_name = dataset_tarball.replace('.tar.gz', '')
+    """
+    mkdir ${dataset_name}
+    mkdir ${task.process}
+    touch ${dataset_name}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -475,6 +601,17 @@ process minmer_sketch {
     shell:
     fastq = single_end ? fq[0] : "${fq[0]} ${fq[1]}"
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir fastqs
+    mkdir ${task.process}
+    touch fastqs/${sample}.fastq.gz
+    touch ${task.process}/*
+    touch ${sample}.sig
+    touch ${sample}-k31.msh
+
+    """
 }
 
 
@@ -504,6 +641,14 @@ process minmer_query {
     mash_w = params.screen_w ? "-w" : ""
     fastq = single_end ? fq[0] : "${fq[0]} ${fq[1]}"
     template(task.ext.template)
+
+    stub:
+    dataset_name = dataset.getName()
+    """
+    mkdir ${task.process}
+    touch *.txt
+    touch ${task.process}/*
+    """
 }
 
 
@@ -535,6 +680,15 @@ process call_variants {
     bwaopt = params.bwaopt ? "--bwaopt 'params.bwaopt'" : ""
     fbopt = params.fbopt ? "--fbopt 'params.fbopt'" : ""
     template(task.ext.template)
+
+    stub:
+    reference_name = reference.getSimpleName()
+    """
+    mkdir ${reference_name}
+    mkdir ${task.process}
+    touch ${reference_name}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -568,6 +722,17 @@ process download_references {
     tie_break = params.random_tie_break ? "--random_tie_break" : ""
     total = params.max_references
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir fastqs
+    mkdir genbank
+    mkdir ${task.process}
+    touch fastqs/${sample}.fastq.gz
+    touch genbank/*.gbk
+    touch ${task.process}/*
+    touch mash-dist.txt
+    """
 }
 
 
@@ -595,6 +760,16 @@ process call_variants_auto {
     bwaopt = params.bwaopt ? "--bwaopt 'params.bwaopt'" : ""
     fbopt = params.fbopt ? "--fbopt 'params.fbopt'" : ""
     template(task.ext.template)
+
+    stub:
+    reference_name = "ref_name"
+    """
+    echo True
+    mkdir ${reference_name}
+    mkdir ${task.process}
+    touch ${reference_name}/*
+    touch ${task.process}/*
+    """
 }
 
 
@@ -627,6 +802,15 @@ process antimicrobial_resistance {
         organism_protein = "-O ${params.amr_organism} --point_mut_all ${amrdir}/${sample}-protein-point-mutations.txt"
     }
     template(task.ext.template)
+
+    stub:
+    amrdir = "antimicrobial-resistance"
+    """
+    mkdir ${amrdir}
+    mkdir logs
+    touch ${amrdir}/*
+    touch logs/*
+    """
 }
 
 
@@ -654,6 +838,14 @@ process plasmid_blast {
     gunzip_genes = genes.getName().replace('.gz', '')
     blastdb = blastdb_files[0].getBaseName()
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    touch ${task.process}/*
+    touch ${sample}-plsdb.json
+    touch ${sample}-plsdb.json.gz
+    """
 }
 
 
@@ -679,6 +871,15 @@ process blast_genes {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    mkdir genes
+    touch ${task.process}/*
+    touch genes/*.json
+    touch genes/*.json.gz
+    """
 }
 
 process blast_primers {
@@ -703,6 +904,15 @@ process blast_primers {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    mkdir primers
+    touch ${task.process}/*
+    touch primers/*.json
+    touch primers/*.json.gz
+    """
 }
 
 process blast_proteins {
@@ -727,6 +937,15 @@ process blast_proteins {
 
     shell:
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    mkdir proteins
+    touch ${task.process}/*
+    touch proteins/*.json
+    touch proteins/*.json.gz
+    """
 }
 
 
@@ -756,6 +975,14 @@ process mapping_query {
     bwa_samse_opts = params.bwa_samse_opts ? params.bwa_samse_opts : ""
     bwa_sampe_opts = params.bwa_sampe_opts ? params.bwa_sampe_opts : ""
     template(task.ext.template)
+
+    stub:
+    """
+    mkdir ${task.process}
+    mkdir mapping
+    touch ${task.process}/*
+    touch mapping/*
+    """
 }
 
 
