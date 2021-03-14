@@ -225,7 +225,6 @@ process qc_reads {
     mkdir ${task.process}
     touch *-error.txt
     touch quality-control/${sample}.fastq.gz
-    touch quality-control/${sample}.fastq.gz
     touch quality-control/${sample}.error-fq.gz
     touch ${task.process}/*
     """
@@ -469,6 +468,8 @@ process annotate_genome {
     touch annotation/${sample}*
     touch annotation/${sample}.ffn
     touch annotation/${sample}.ffn.gz
+    touch annotation/${sample}.faa
+    touch annotation/${sample}.faa.gz
     touch "${task.process}/*"
     """
 }
@@ -529,6 +530,9 @@ process sequence_type {
     template(task.ext.template)
 
     stub:
+    method = dataset =~ /.*blastdb.*/ ? 'blast' : 'ariba'
+    dataset_tarball = file(dataset).getName()
+    schema = dataset_tarball.split('-')[0]
     """
     mkdir ${method}
     mkdir ${task.process}
@@ -564,6 +568,8 @@ process ariba_analysis {
     template(task.ext.template)
 
     stub:
+    dataset_tarball = file(dataset).getName()
+    dataset_name = dataset_tarball.replace('.tar.gz', '')
     """
     mkdir ${dataset_name}
     mkdir ${task.process}
@@ -637,6 +643,7 @@ process minmer_query {
     template(task.ext.template)
 
     stub:
+    dataset_name = dataset.getName()
     """
     mkdir ${task.process}
     touch *.txt
@@ -675,6 +682,7 @@ process call_variants {
     template(task.ext.template)
 
     stub:
+    reference_name = reference.getSimpleName()
     """
     mkdir ${reference_name}
     mkdir ${task.process}
@@ -754,7 +762,9 @@ process call_variants_auto {
     template(task.ext.template)
 
     stub:
+    reference_name = "ref_name"
     """
+    echo True
     mkdir ${reference_name}
     mkdir ${task.process}
     touch ${reference_name}/*
@@ -794,6 +804,7 @@ process antimicrobial_resistance {
     template(task.ext.template)
 
     stub:
+    amrdir = "antimicrobial-resistance"
     """
     mkdir ${amrdir}
     mkdir logs
