@@ -1,0 +1,39 @@
+process antimicrobial_resistance {
+    /*
+    Query nucleotides and proteins (SNPs/InDels) against one or more reference genomes selected based
+    on their Mash distance from the input.
+    */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "logs/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${amrdir}/*"
+
+    input:
+    set val(sample), file(genes), file(proteins) from ANTIMICROBIAL_RESISTANCE
+    each file(amrdb) from AMR_DATABASES
+
+    output:
+    file "${amrdir}/*"
+    file "logs/*" optional true
+
+    shell:
+    amrdir = "antimicrobial-resistance"
+    plus = params.amr_plus ? "--plus" : ""
+    report_common = params.amr_report_common ? "--report_common" : ""
+    organism_gene = ""
+    organism_protein = ""
+    if (params.amr_organism) {
+        organism_gene = "-O ${params.amr_organism} --point_mut_all ${amrdir}/${sample}-gene-point-mutations.txt"
+        organism_protein = "-O ${params.amr_organism} --point_mut_all ${amrdir}/${sample}-protein-point-mutations.txt"
+    }
+    template(task.ext.template)
+
+    stub:
+    amrdir = "antimicrobial-resistance"
+    """
+    mkdir ${amrdir}
+    mkdir logs
+    touch ${amrdir}/*
+    touch logs/*
+    """
+}
