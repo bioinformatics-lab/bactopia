@@ -9,15 +9,15 @@ process gather_fastqs {
     tag "${sample}"
 
     input:
-    set val(sample), val(sample_type), val(single_end), file(r1: '*???-r1'), file(r2: '*???-r2'), file(extra) from create_input_channel(run_type)
+    tuple val(sample), val(sample_type), val(single_end), file(r1: '*???-r1'), file(r2: '*???-r2'), file(extra)// from create_input_channel(run_type)
 
     output:
-    file "*-error.txt" optional true
-    set val(sample), val(final_sample_type), val(single_end),
-        file("fastqs/${sample}*.fastq.gz"), file("extra/*.gz") optional true into FASTQ_PE_STATUS
-    file "${task.process}/*" optional true
-    file "bactopia.versions" optional true
-    file "multiple-read-sets-merged.txt" optional true
+    file("*-error.txt") optional true
+    tuple val(sample), val(final_sample_type), val(single_end),
+        file("fastqs/${sample}*.fastq.gz"), file("extra/*.gz") optional true
+    file("${task.process}/*") optional true
+    file("bactopia.versions") optional true
+    file("multiple-read-sets-merged.txt") optional true
 
     shell:
     bactopia_version = VERSION
@@ -67,19 +67,30 @@ process gather_fastqs {
     """
 }
 
-//###############//
-//Module testing //
-//###############//
+//###############
+//Module testing 
+//###############
+/*
 
-workflow test {
+
+*/
+workflow {
+    VERSION = params.version
+    outdir = params.outdir
+    sample = params.sample
+    final_sample_type = "paired-end" 
+    single_end = params.single_end
+    run_type = params.run_type
+    
     test_params_input = Channel.of([
-            val(params.sample), 
-            val(params.sample_type), 
-            val(params.single_end), 
-            file(params.r1),
-            file(params.r2)            
+        params.sample, 
+        params.sample_type, 
+        params.single_end,
+        params.run_type,
+        params.r1,
+        params.r2             
         ])
 
     gather_fastqs(test_params_input)
-
+    gather_fastqs.out[1].view()
 }
