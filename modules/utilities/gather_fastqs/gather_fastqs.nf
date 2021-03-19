@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process gather_fastqs {
     /* Gather up input FASTQs for analysis. */
     publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
@@ -63,4 +65,21 @@ process gather_fastqs {
     touch bactopia.versions
     touch multiple-read-sets-merged.txt
     """
+}
+
+//###############//
+//Module testing //
+//###############//
+
+workflow test {
+    test_params_input = Channel.of([
+            val(params.sample), 
+            val(params.sample_type), 
+            val(params.single_end), 
+            file(params.r1),
+            file(params.r2)            
+        ])
+
+    gather_fastqs(test_params_input)
+
 }
