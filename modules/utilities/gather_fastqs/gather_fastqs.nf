@@ -70,17 +70,8 @@ process gather_fastqs {
 //###############
 //Module testing 
 //###############
-/*
 
-
-*/
 workflow {
-    VERSION = params.version
-    outdir = params.outdir
-    sample = params.sample
-    final_sample_type = "paired-end" 
-    single_end = params.single_end
-    run_type = params.run_type
     
     test_params_input = Channel.of([
         params.sample, 
