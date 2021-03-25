@@ -55,7 +55,7 @@ SPECIES_GENOME_SIZE = null
 print_efficiency() 
 setup_datasets()
 
-include { ather_fastqs } from './modules/utilities'
+include { gather_fastqs } from './modules/utilities'
 include { fastq_status } from './modules/utilities'
 include { estimate_genome_size } from './modules/mash'
 include { qc_reads } from './modules/utilities/quality_control'
