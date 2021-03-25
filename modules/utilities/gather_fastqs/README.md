@@ -11,4 +11,4 @@ Using DSL2 each module can be tested separately, using a test workflow inside th
 
 ## How to test it:
 
-$ nextflow run gather_fastqs.nf -entry test -params-file test_params.yaml -profile test
+$ nextflow run gather_fastqs.nf -params-file test_params.yaml -profile test

@@ -51,8 +51,8 @@ process gather_fastqs {
     } else if (sample_type == 'merge-se') {
         final_sample_type = 'single-end'
     }
-    template(task.ext.template)
-    
+
+    template "gather_fastqs.sh"    
     stub:
     """
     mkdir fastqs
@@ -71,7 +71,7 @@ process gather_fastqs {
 //Module testing 
 //###############
 
-workflow {
+workflow test{
     
     test_params_input = Channel.of([
         params.sample, 
@@ -83,5 +83,24 @@ workflow {
         ])
 
     gather_fastqs(test_params_input)
-    gather_fastqs.out[1].view()
+
+}
+workflow.onComplete {
+
+    println """
+
+    gather_fastqs Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }
