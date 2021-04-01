@@ -66,7 +66,7 @@ workflow.onComplete {
 
     println """
 
-    fastq_status Test Execution Summary
+    qc_reads Test Execution Summary
     ---------------------------
     Command Line    : ${workflow.commandLine}
     Resumed         : ${workflow.resume}
