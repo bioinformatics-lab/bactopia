@@ -34,7 +34,7 @@ process fastq_status {
 
 workflow test{
     
-    FASTQ_PE_STATUS = Channel.of([
+    TEST_PARAMS_CH = Channel.of([
         params.sample, 
         params.sample_type, 
         params.single_end,
@@ -42,7 +42,7 @@ workflow test{
         params.extra             
         ])
 
-    fastq_status(FASTQ_PE_STATUS)
+    fastq_status(TEST_PARAMS_CH)
 }
 workflow.onComplete {
 
