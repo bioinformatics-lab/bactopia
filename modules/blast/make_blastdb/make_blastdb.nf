@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process make_blastdb {
     /* Create a BLAST database of the assembly using BLAST */
     tag "${sample}"
@@ -6,15 +8,15 @@ process make_blastdb {
     publishDir "${outdir}/${sample}/blast", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "blastdb/*"
 
     input:
-    set val(sample), val(single_end), file(fasta) from MAKE_BLASTDB
+    tuple val(sample), val(single_end), file(fasta)
 
     output:
     file("blastdb/*")
-    set val(sample), file("blastdb/*") into BLAST_GENES, BLAST_PRIMERS, BLAST_PROTEINS
+    tuple val(sample), file("blastdb/*") optional true// emit: BLAST_GENES, BLAST_PRIMERS, BLAST_PROTEINS, optional:true
     file "${task.process}/*" optional true
 
     shell:
-    template(task.ext.template)
+    template "make_blastdb.sh" 
 
     stub:
     """
@@ -24,3 +26,38 @@ process make_blastdb {
     touch ${task.process}/*
     """
 }
+
+//###############
+//Module testing 
+//###############
+
+workflow test{
+    
+    TEST_PARAMS_CH = Channel.of([
+        params.sample, 
+        params.single_end, 
+        params.fasta          
+        ])
+
+    make_blastdb(TEST_PARAMS_CH)
+}
+workflow.onComplete {
+
+    println """
+
+    assemble_genome Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
+}
+

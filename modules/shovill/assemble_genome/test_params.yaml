@@ -1,0 +1,86 @@
+genome_size:
+  "test_data/genome-size.txt"
+
+outdir:
+  "test_output"
+  
+sample:
+  "TEST_SAMPLE"
+
+sample_type:
+  "paired-end"
+
+single_end:
+  "test"
+
+fq:
+  "test_data/SRR2838702_R1.fastq.gz"
+
+extra:
+  "test_data/empty.fna.gz"
+
+publish_mode:
+  "copy"
+
+run_type:
+  "fastqs"
+
+version:
+  "1.6.0"
+
+overwrite:
+  "some_value"
+
+shovill_opts:
+  ""
+
+shovill_kmers:
+  ""
+
+nostitch:
+  ""
+
+nocorr:
+  ""
+
+no_miniasm:
+  ""
+
+no_rotate:
+  " "
+
+no_pilon:
+  ""
+
+min_contig_len:
+  ""
+
+unicycler_mode:
+  ""
+
+min_polish_size:
+  ""
+
+min_component_size:
+  ""
+
+min_dead_end_size:
+  ""
+
+compress:
+  ""
+
+assembler:
+  ""
+
+min_contig_cov:
+  ""
+
+contig_namefmt:
+  ""
+
+min_genome_size:
+  ""
+
+
+
