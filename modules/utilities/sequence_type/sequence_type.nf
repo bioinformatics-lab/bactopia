@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process sequence_type {
     /* Determine MLST types using ARIBA and BLAST */
     tag "${sample} - ${schema} - ${method}"
@@ -6,8 +8,8 @@ process sequence_type {
     publishDir "${outdir}/${sample}/mlst/${schema}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${method}/*"
 
     input:
-    set val(sample), val(single_end), file(fq), file(assembly) from SEQUENCE_TYPE
-    each file(dataset) from MLST_DATABASES
+    tuple val(sample), val(single_end), file(fq), file(assembly)
+    each file(dataset)
 
     output:
     file "${method}/*"
@@ -35,4 +37,43 @@ process sequence_type {
     touch ${method}/*
     touch ${task.process}/*
     """
+}
+
+//###############
+//Module testing 
+//###############
+
+workflow test{
+    
+    TEST_PARAMS_CH = Channel.of([
+        params.sample,
+        params.single_end,
+        params.fq,
+        params.assembly
+        ])
+    TEST_PARAMS_CH2 = Channel.of([
+        params.dataset])
+    MLST_DATABASES = Channel.of([
+        params.mlst])
+
+    sequence_type(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+}
+workflow.onComplete {
+
+    println """
+
+    assemble_genome Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }

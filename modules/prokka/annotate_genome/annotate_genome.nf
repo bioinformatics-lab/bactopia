@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process annotate_genome {
     /* Annotate the assembly using Prokka, use a proteins FASTA if available */
     tag "${sample}"
@@ -6,16 +8,16 @@ process annotate_genome {
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "annotation/${sample}*"
 
     input:
-    set val(sample), val(single_end), file(fq), file(fasta), file(total_contigs) from ANNOTATION
-    file prokka_proteins from PROKKA_PROTEINS
-    file prodigal_tf from PRODIGAL_TF
+    tuple val(sample), val(single_end), file(fq), file(fasta), file(total_contigs)
+    file prokka_proteins
+    file prodigal_tf
 
     output:
     file "annotation/${sample}*"
-    set val(sample), file("annotation/${sample}.{ffn,ffn.gz}") optional true into PLASMID_BLAST
-    set val(sample),
+    tuple val(sample), file("annotation/${sample}.{ffn,ffn.gz}"),emit: PLASMID_BLAST,optional: true
+    tuple val(sample),
         file("annotation/${sample}.{ffn,ffn.gz}"),
-        file("annotation/${sample}.{faa,faa.gz}") optional true into ANTIMICROBIAL_RESISTANCE
+        file("annotation/${sample}.{faa,faa.gz}"),emit: ANTIMICROBIAL_RESISTANCE, optional: true
     file "${task.process}/*" optional true
 
     shell:
@@ -57,7 +59,7 @@ process annotate_genome {
     notrna = params.notrna ? "--notrna" : ""
     rnammer = params.rnammer ? "--rnammer" : ""
     rfam = params.rnammer ? "--rfam" : ""
-    template(task.ext.template)
+    template "annotate_genome.sh"
 
     stub:
     """
@@ -70,4 +72,46 @@ process annotate_genome {
     touch annotation/${sample}.faa.gz
     touch "${task.process}/*"
     """
+}
+
+
+//###############
+//Module testing 
+//###############
+
+workflow test{
+    TEST_PARAMS_CH = Channel.of([
+        params.sample, 
+        params.single_end,
+        params.fq, 
+        params.fasta,
+        params.total_contigs
+        ])
+    TEST_PARAMS_CH2 = Channel.of([
+        params.prokka_proteins
+        ])
+    TEST_PARAMS_CH3 = Channel.of([
+        params.prodigal_tf
+        ])
+
+    annotate_genome(TEST_PARAMS_CH,TEST_PARAMS_CH2,TEST_PARAMS_CH3)
+}
+workflow.onComplete {
+
+    println """
+
+    assemble_genome Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }
