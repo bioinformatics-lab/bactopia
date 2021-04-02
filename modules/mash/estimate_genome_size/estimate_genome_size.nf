@@ -31,6 +31,7 @@ process estimate_genome_size {
     touch ${task.process}/*
     """
 }
+
 //###############
 //Module testing 
 //###############

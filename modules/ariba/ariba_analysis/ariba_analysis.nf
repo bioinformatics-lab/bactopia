@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process ariba_analysis {
     /* Run reads against all available (if any) ARIBA datasets */
     tag "${sample} - ${dataset_name}"
@@ -6,8 +8,8 @@ process ariba_analysis {
     publishDir "${outdir}/${sample}/ariba", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${dataset_name}/*"
 
     input:
-    set val(sample), val(single_end), file(fq) from ARIBA_ANALYSIS
-    each file(dataset) from ARIBA_DATABASES
+    tuple val(sample), val(single_end), file(fq)
+    each file(dataset)
 
     output:
     file "${dataset_name}/*"
@@ -21,7 +23,7 @@ process ariba_analysis {
     dataset_name = dataset_tarball.replace('.tar.gz', '')
     spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
     noclean = params.ariba_no_clean ? "--noclean" : ""
-    template(task.ext.template)
+    template "ariba_analysis.sh"
 
     stub:
     dataset_tarball = file(dataset).getName()
@@ -32,4 +34,40 @@ process ariba_analysis {
     touch ${dataset_name}/*
     touch ${task.process}/*
     """
+}
+
+//###############
+//Module testing 
+//###############
+
+workflow test {
+    TEST_PARAMS_CH = Channel.of([
+        params.sample, 
+        params.single_end, 
+        params.fq         
+        ])
+    TEST_PARAMS_CH2 = Channel.of([
+        params.dataset
+        ])
+
+    ariba_analysis(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+}
+workflow.onComplete {
+
+    println """
+
+    estimate_genome_size Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }

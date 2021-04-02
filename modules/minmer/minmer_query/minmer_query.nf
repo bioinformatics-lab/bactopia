@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process minmer_query {
     /*
     Query minmer sketches against pre-computed RefSeq (Mash, k=21) and
@@ -9,8 +11,8 @@ process minmer_query {
     publishDir "${outdir}/${sample}/minmers", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*.txt"
 
     input:
-    set val(sample), val(single_end), file(fq), file(sourmash) from MINMER_QUERY
-    each file(dataset) from MINMER_DATABASES
+    tuple val(sample), val(single_end), file(fq), file(sourmash)
+    each file(dataset)
 
     output:
     file "*.txt"
@@ -32,4 +34,40 @@ process minmer_query {
     touch *.txt
     touch ${task.process}/*
     """
+}
+
+//###############
+//Module testing 
+//###############
+
+workflow test {
+    TEST_PARAMS_CH = Channel.of([
+        params.sample, 
+        params.single_end, 
+        params.fq,   
+        params.sourmash
+        ])
+    TEST_PARAMS_CH2 = Channel.of([
+        params.dataset
+        ])
+    minmer_query(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+}
+workflow.onComplete {
+
+    println """
+
+    estimate_genome_size Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }

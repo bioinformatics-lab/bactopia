@@ -1,3 +1,6 @@
+genome_size:
+  "test_data/genome-size.txt"
+
 outdir:
   "test_output"
   
@@ -10,10 +13,6 @@ single_end:
 fq:
   "test_data/SRR2838702_R1.fastq.gz"
 
-dataset:
-  "test_data/dataset.fasta.gz"
-
-
 publish_mode:
   "copy"
 
@@ -25,3 +24,12 @@ version:
 
 overwrite:
   "some_value"
+
+mash_sketch:
+  " "
+
+sourmash_scale:
+  " "
+
+skip_logs:
+  " "
