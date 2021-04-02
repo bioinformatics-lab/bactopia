@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process call_variants_auto {
     /*
     Identify variants (SNPs/InDels) against one or more reference genomes selected based
@@ -9,7 +11,7 @@ process call_variants_auto {
     publishDir "${outdir}/${sample}/variants/auto", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${reference_name}/*"
 
     input:
-    set val(sample), val(single_end), file(fq), file(reference) from create_reference_channel(CALL_VARIANTS_AUTO)
+    tuple val(sample), val(single_end), file(fq), file(reference)
 
     output:
     file "${reference_name}/*"
@@ -21,7 +23,7 @@ process call_variants_auto {
     fastq = single_end ? "--se ${fq[0]}" : "--R1 ${fq[0]} --R2 ${fq[1]}"
     bwaopt = params.bwaopt ? "--bwaopt 'params.bwaopt'" : ""
     fbopt = params.fbopt ? "--fbopt 'params.fbopt'" : ""
-    template(task.ext.template)
+    template "call_variants_auto.sh"
 
     stub:
     reference_name = "ref_name"
@@ -32,4 +34,38 @@ process call_variants_auto {
     touch ${reference_name}/*
     touch ${task.process}/*
     """
+}
+
+
+//###############
+//Module testing 
+//###############
+
+workflow test {
+    TEST_PARAMS_CH = Channel.of([
+        params.sample, 
+        params.single_end, 
+        params.fq,
+        params.reference
+        ])
+    call_variants_auto(TEST_PARAMS_CH)
+}
+workflow.onComplete {
+
+    println """
+
+    estimate_genome_size Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }

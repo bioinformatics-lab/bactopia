@@ -25,7 +25,7 @@ process minmer_query {
     dataset_name = dataset.getName()
     mash_w = params.screen_w ? "-w" : ""
     fastq = single_end ? fq[0] : "${fq[0]} ${fq[1]}"
-    template(task.ext.template)
+    template "minmer_query.sh"
 
     stub:
     dataset_name = dataset.getName()
