@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process download_references {
     /*
     Download the nearest RefSeq genomes (based on Mash) to have variants called against.
@@ -12,11 +14,11 @@ process download_references {
     publishDir "${outdir}/${sample}/variants/auto", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: 'mash-dist.txt'
 
     input:
-    set val(sample), val(single_end), file(fq), file(sample_sketch) from DOWNLOAD_REFERENCES
-    file(refseq_sketch) from REFSEQ_SKETCH
+    tuple val(sample), val(single_end), file(fq), file(sample_sketch)
+    file(refseq_sketch)
 
     output:
-    set val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("genbank/*.gbk") optional true into CALL_VARIANTS_AUTO
+    tuple val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("genbank/*.gbk"), emit:CALL_VARIANTS_AUTO, optional: true
     file("mash-dist.txt")
     file "${task.process}/*" optional true
 
@@ -39,4 +41,40 @@ process download_references {
     touch ${task.process}/*
     touch mash-dist.txt
     """
+}
+
+//###############
+//Module testing 
+//###############
+
+workflow test {
+    TEST_PARAMS_CH = Channel.of([
+        params.sample, 
+        params.single_end, 
+        params.fq,
+        params.sample_sketch
+        ])
+    TEST_PARAMS_CH2 = Channel.of([
+        params.refseq_sketch
+        ])
+    download_references(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+}
+workflow.onComplete {
+
+    println """
+
+    estimate_genome_size Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }
