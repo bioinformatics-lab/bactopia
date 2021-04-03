@@ -8,8 +8,8 @@ process mapping_query {
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "mapping/*"
 
     input:
-    set val(sample), val(single_end), file(fq) from MAPPING_QUERY
-    file(query) from Channel.from(MAPPING_FASTAS).collect()
+    tuple val(sample), val(single_end), file(fq)
+    file(query)// from Channel.from(MAPPING_FASTAS).collect()
 
     output:
     file "mapping/*"
@@ -32,4 +32,39 @@ process mapping_query {
     touch ${task.process}/*
     touch mapping/*
     """
+}
+
+//###############
+//Module testing 
+//###############
+
+workflow test{
+    TEST_PARAMS_CH = Channel.of([
+        params.sample, 
+        params.single_end,
+        params.fq,
+        ])
+    TEST_PARAMS_CH2 = Channel.of([
+        params.query
+        ])
+    annotate_genome(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+}
+workflow.onComplete {
+
+    println """
+
+    assemble_genome Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }

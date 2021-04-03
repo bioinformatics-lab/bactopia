@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process antimicrobial_resistance {
     /*
     Query nucleotides and proteins (SNPs/InDels) against one or more reference genomes selected based
@@ -9,8 +11,8 @@ process antimicrobial_resistance {
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${amrdir}/*"
 
     input:
-    set val(sample), file(genes), file(proteins) from ANTIMICROBIAL_RESISTANCE
-    each file(amrdb) from AMR_DATABASES
+    tuple val(sample), file(genes), file(proteins)
+    each file(amrdb)
 
     output:
     file "${amrdir}/*"
@@ -26,7 +28,7 @@ process antimicrobial_resistance {
         organism_gene = "-O ${params.amr_organism} --point_mut_all ${amrdir}/${sample}-gene-point-mutations.txt"
         organism_protein = "-O ${params.amr_organism} --point_mut_all ${amrdir}/${sample}-protein-point-mutations.txt"
     }
-    template(task.ext.template)
+    template "antimicrobial_resistance.sh"
 
     stub:
     amrdir = "antimicrobial-resistance"
@@ -36,4 +38,39 @@ process antimicrobial_resistance {
     touch ${amrdir}/*
     touch logs/*
     """
+}
+
+//###############
+//Module testing 
+//###############
+
+workflow test {
+    TEST_PARAMS_CH = Channel.of([
+        params.sample, 
+        params.genes, 
+        params.proteins
+        ])
+    TEST_PARAMS_CH2 = Channel.of([
+        params.amrdb
+        ])
+    antimicrobial_resistance(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+}
+workflow.onComplete {
+
+    println """
+
+    estimate_genome_size Test Execution Summary
+    ---------------------------
+    Command Line    : ${workflow.commandLine}
+    Resumed         : ${workflow.resume}
+
+    Completed At    : ${workflow.complete}
+    Duration        : ${workflow.duration}
+    Success         : ${workflow.success}
+    Exit Code       : ${workflow.exitStatus}
+    Error Report    : ${workflow.errorReport ?: '-'}
+    """
+}
+workflow.onError {
+    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }

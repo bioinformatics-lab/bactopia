@@ -29,7 +29,7 @@ process download_references {
     no_cache = params.no_cache ? '-N' : ''
     tie_break = params.random_tie_break ? "--random_tie_break" : ""
     total = params.max_references
-    template(task.ext.template)
+    template "download_references.sh"
 
     stub:
     """
