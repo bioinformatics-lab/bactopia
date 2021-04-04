@@ -14,7 +14,7 @@ process estimate_genome_size {
     file "${sample}-genome-size-error.txt" optional true
     file("${sample}-genome-size.txt") optional true
     tuple val(sample), val(sample_type), val(single_end), 
-        file("fastqs/${sample}*.fastq.gz"), file(extra), file("${sample}-genome-size.txt")//,emit: QC_READS, QC_ORIGINAL_SUMMARY optional true
+        file("fastqs/${sample}*.fastq.gz"), file(extra), file("${sample}-genome-size.txt"),emit: QUALITY_CONTROL, optional: true
     file "${task.process}/*" optional true
 
     shell:

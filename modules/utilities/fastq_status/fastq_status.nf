@@ -10,7 +10,7 @@ process fastq_status {
     output:
     file "*-error.txt" optional true
     tuple val(sample), val(sample_type), val(single_end), 
-        file("fastqs/${sample}*.fastq.gz"), file(extra),emit: ESTIMATE_GENOME_SIZE optional true
+        file("fastqs/${sample}*.fastq.gz"), file(extra),emit: ESTIMATE_GENOME_SIZE, optional: true
     file "${task.process}/*" optional true
 
     shell:

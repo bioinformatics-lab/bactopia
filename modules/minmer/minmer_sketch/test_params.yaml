@@ -5,10 +5,10 @@ outdir:
   "test_output"
   
 sample:
-  "TEST_SAMPLE"
+  "SRR2838702"
 
 single_end:
-  "test"
+  "false"
 
 fq:
   "test_data/SRR2838702_R1.fastq.gz"

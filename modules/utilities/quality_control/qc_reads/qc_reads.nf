@@ -19,11 +19,11 @@ process qc_reads {
         file("quality-control/${sample}*.fastq.gz")//,emit: COUNT_31MERS, ARIBA_ANALYSIS,MINMER_SKETCH, CALL_VARIANTS,MAPPING_QUERY optional true
     tuple val(sample), val(sample_type), val(single_end),
         file("quality-control/${sample}*.fastq.gz"), file(extra),
-        file(genome_size),emit: ASSEMBLY optional true
+        file(genome_size),emit: ASSEMBLY, optional: true
 
     tuple val(sample), val(single_end),
         file("quality-control/${sample}*.{fastq,error-fq}.gz"),
-        file(genome_size),emit: QC_FINAL_SUMMARY optional true
+        file(genome_size),emit: QC_FINAL_SUMMARY, optional: true
     file "${task.process}/*" optional true
 
     shell:

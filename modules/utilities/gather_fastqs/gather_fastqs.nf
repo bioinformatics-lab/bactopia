@@ -14,7 +14,7 @@ process gather_fastqs {
     output:
     file("*-error.txt") optional true
     tuple val(sample), val(final_sample_type), val(single_end),
-        file("fastqs/${sample}*.fastq.gz"), file("extra/*.gz"), emit: FASTQ_PE_STATUS optional true
+        file("fastqs/${sample}*.fastq.gz"), file("extra/*.gz"), emit: FASTQ_PE_STATUS, optional: true
     file("${task.process}/*") optional true
     file("bactopia.versions") optional true
     file("multiple-read-sets-merged.txt") optional true

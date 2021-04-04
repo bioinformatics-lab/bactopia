@@ -2,10 +2,10 @@ outdir:
   "test_output"
   
 sample:
-  "TEST_SAMPLE"
+  "SRR2838702"
 
 single_end:
-  "test"
+  "false"
 
 sample_type:
   "single_end"

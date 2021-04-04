@@ -2,13 +2,13 @@ outdir:
   "test_output"
   
 sample:
-  "TEST_SAMPLE"
+  "test_data/SRR2838702"
 
 sample_type:
   "paired-end"
 
 single_end:
-  "test"
+  "false"
 
 fq:
   "test_data/SRR2838702_R1.fastq.gz"
