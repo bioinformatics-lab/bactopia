@@ -1,6 +1,3 @@
-genome_size:
-  "test_data/genome-size.txt"
-
 outdir:
   "test_output"
   
@@ -18,6 +15,9 @@ fq:
 
 extra:
   "test_data/empty.fna.gz"
+
+genome_size:
+  "test_data/genome-size.txt"
 
 publish_mode:
   "copy"

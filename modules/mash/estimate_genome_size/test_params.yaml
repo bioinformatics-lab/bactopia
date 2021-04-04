@@ -7,12 +7,14 @@ sample:
 single_end:
   "test"
 
+sample_type:
+  "single_end"
+  
 fq:
   "test_data/SRR2838702_R1.fastq.gz"
 
-dataset:
-  "test_data/dataset.fasta.gz"
-
+extra:
+  "test_data/empty.fna.gz"
 
 publish_mode:
   "copy"

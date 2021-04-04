@@ -53,7 +53,7 @@ process gather_fastqs {
     }
 
     '''
-    #!/bin/bash
+#!/bin/bash
 set -e
 set -u
 LOG_DIR="!{task.process}"

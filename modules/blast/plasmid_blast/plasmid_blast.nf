@@ -93,13 +93,13 @@ fi
 workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample, 
-        params.blastdb,          
+        params.genes,          
         ])
     TEST_PARAMS_CH2 = Channel.of([
         params.blastdb_files
         ])
 
-    blast_genes(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+    plasmid_blast(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }
 workflow.onComplete {
 

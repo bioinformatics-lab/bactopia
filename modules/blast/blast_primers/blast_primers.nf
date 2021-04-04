@@ -93,7 +93,7 @@ workflow test {
         params.query
         ])
 
-    blast_genes(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+    blast_primers(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }
 workflow.onComplete {
 

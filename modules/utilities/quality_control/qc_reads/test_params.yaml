@@ -1,6 +1,3 @@
-genome_size:
-  "test_data/genome-size.txt"
-
 outdir:
   "test_output"
   
@@ -14,10 +11,13 @@ single_end:
   "test"
 
 fq:
-  "/test_data/SRR2838702_R1.fastq.gz"
+  "test_data/SRR2838702_R1.fastq.gz"
 
 extra:
-  "/test_data/empty.fna.gz"
+  "test_data/empty.fna.gz"
+
+genome_size:
+  "test_data/genome-size.txt"
 
 publish_mode:
   "copy"

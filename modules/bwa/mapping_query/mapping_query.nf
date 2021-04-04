@@ -2,14 +2,14 @@ process mapping_query {
     /*
     Map FASTQ reads against a given set of FASTA files using BWA.
     */
-    tag "${sample}}"
+    tag "${sample}"
 
     publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "mapping/*"
 
     input:
     tuple val(sample), val(single_end), file(fq)
-    file(query)// from Channel.from(MAPPING_FASTAS).collect()
+    file(query)
 
     output:
     file "mapping/*"

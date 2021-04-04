@@ -10,7 +10,7 @@ process blast_genes {
     publishDir "${outdir}/${sample}/blast", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "genes/*.{json,json.gz}"
 
     input:
-    tuple val(sample), file(blastdb)
+    tuple val(sample), fi755555le(blastdb)
     file(query) 
 
     output:
