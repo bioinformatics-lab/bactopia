@@ -126,22 +126,3 @@ workflow test{
 
     fastq_status(TEST_PARAMS_CH)
 }
-workflow.onComplete {
-
-    println """
-
-    fastq_status Test Execution Summary
-    ---------------------------
-    Command Line    : ${workflow.commandLine}
-    Resumed         : ${workflow.resume}
-
-    Completed At    : ${workflow.complete}
-    Duration        : ${workflow.duration}
-    Success         : ${workflow.success}
-    Exit Code       : ${workflow.exitStatus}
-    Error Report    : ${workflow.errorReport ?: '-'}
-    """
-}
-workflow.onError {
-    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
-}

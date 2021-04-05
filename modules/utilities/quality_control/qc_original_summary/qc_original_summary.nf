@@ -96,22 +96,3 @@ workflow test{
 
     qc_original_summary(TEST_PARAMS_CH)
 }
-workflow.onComplete {
-
-    println """
-
-    qc_original_summary Test Execution Summary
-    ---------------------------
-    Command Line    : ${workflow.commandLine}
-    Resumed         : ${workflow.resume}
-
-    Completed At    : ${workflow.complete}
-    Duration        : ${workflow.duration}
-    Success         : ${workflow.success}
-    Exit Code       : ${workflow.exitStatus}
-    Error Report    : ${workflow.errorReport ?: '-'}
-    """
-}
-workflow.onError {
-    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
-}
