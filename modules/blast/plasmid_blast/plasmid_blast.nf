@@ -80,7 +80,7 @@ fi
     stub:
     """
     mkdir ${task.process}
-    touch ${task.process}/*
+    touch ${task.process}/${sample}
     touch ${sample}-plsdb.json
     touch ${sample}-plsdb.json.gz
     """
@@ -100,23 +100,4 @@ workflow test {
         ])
 
     plasmid_blast(TEST_PARAMS_CH,TEST_PARAMS_CH2)
-}
-workflow.onComplete {
-
-    println """
-
-    estimate_genome_size Test Execution Summary
-    ---------------------------
-    Command Line    : ${workflow.commandLine}
-    Resumed         : ${workflow.resume}
-
-    Completed At    : ${workflow.complete}
-    Duration        : ${workflow.duration}
-    Success         : ${workflow.success}
-    Exit Code       : ${workflow.exitStatus}
-    Error Report    : ${workflow.errorReport ?: '-'}
-    """
-}
-workflow.onError {
-    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }

@@ -12,18 +12,52 @@ process make_blastdb {
 
     output:
     file("blastdb/*")
-    tuple val(sample), file("blastdb/*") optional true// emit: BLAST_GENES, BLAST_PRIMERS, BLAST_PROTEINS, optional:true
+    tuple val(sample), file("blastdb/*"), emit: BLAST_GENES, optional:true
     file "${task.process}/*" optional true
 
     shell:
-    template "make_blastdb.sh" 
+    '''
+#!/bin/bash
+set -e
+set -u
+LOG_DIR="!{task.process}"
+mkdir blastdb
+mkdir -p ${LOG_DIR}
+echo "# Timestamp" > ${LOG_DIR}/!{task.process}.versions
+date --iso-8601=seconds >> ${LOG_DIR}/!{task.process}.versions
+echo "# makeblastdb Version" >> ${LOG_DIR}/!{task.process}.versions
+makeblastdb -version >> ${LOG_DIR}/!{task.process}.versions 2>&1
+
+# Verify AWS files were staged
+if [[ ! -L "!{fasta}" ]]; then
+    check-staging.py --assembly !{fasta}
+fi
+
+if [[ !{params.compress} == "true" ]]; then
+    gzip -cd !{fasta} | \
+    makeblastdb -dbtype "nucl" -title "Assembled contigs for !{sample}" -out blastdb/!{sample}
+else
+    cat !{fasta} | \
+    makeblastdb -dbtype "nucl" -title "Assembled contigs for !{sample}" -out blastdb/!{sample}
+fi
+
+if [ "!{params.skip_logs}" == "false" ]; then 
+    cp .command.err ${LOG_DIR}/!{task.process}.err
+    cp .command.out ${LOG_DIR}/!{task.process}.out
+    cp .command.sh ${LOG_DIR}/!{task.process}.sh || :
+    cp .command.trace ${LOG_DIR}/!{task.process}.trace || :
+else
+    rm -rf ${LOG_DIR}/
+fi
+
+    '''
 
     stub:
     """
     mkdir blastdb
     mkdir ${task.process}
-    touch blastdb/*
-    touch ${task.process}/*
+    touch blastdb/${sample}
+    touch ${task.process}/${sample}
     """
 }
 
@@ -41,23 +75,3 @@ workflow test{
 
     make_blastdb(TEST_PARAMS_CH)
 }
-workflow.onComplete {
-
-    println """
-
-    assemble_genome Test Execution Summary
-    ---------------------------
-    Command Line    : ${workflow.commandLine}
-    Resumed         : ${workflow.resume}
-
-    Completed At    : ${workflow.complete}
-    Duration        : ${workflow.duration}
-    Success         : ${workflow.success}
-    Exit Code       : ${workflow.exitStatus}
-    Error Report    : ${workflow.errorReport ?: '-'}
-    """
-}
-workflow.onError {
-    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
-}
-
