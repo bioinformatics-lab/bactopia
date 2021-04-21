@@ -86,7 +86,7 @@ fi
     mkdir fastqs
     mkdir ${task.process}
     touch fastqs/${sample}.fastq.gz
-    touch ${task.process}/*
+    touch ${task.process}/${sample}
     touch ${sample}.sig
     touch ${sample}-k31.msh
 
@@ -105,23 +105,4 @@ workflow test {
         ])
 
     minmer_sketch(TEST_PARAMS_CH)
-}
-workflow.onComplete {
-
-    println """
-
-    estimate_genome_size Test Execution Summary
-    ---------------------------
-    Command Line    : ${workflow.commandLine}
-    Resumed         : ${workflow.resume}
-
-    Completed At    : ${workflow.complete}
-    Duration        : ${workflow.duration}
-    Success         : ${workflow.success}
-    Exit Code       : ${workflow.exitStatus}
-    Error Report    : ${workflow.errorReport ?: '-'}
-    """
-}
-workflow.onError {
-    println "This test wasn't successful, Error Message: ${workflow.errorMessage}"
 }

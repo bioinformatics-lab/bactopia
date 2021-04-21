@@ -104,9 +104,9 @@ fi
     """
     mkdir ${task.process}
     mkdir fastqs
-    touch *-error.txt
+    touch ${sample}-error.txt
     touch fastqs/${sample}.fastq.gz
-    touch ${task.process}/*
+    touch ${task.process}/${sample}
     """
 }
 

@@ -223,7 +223,7 @@ fi
 
 echo "# fastq-scan Version" >> ${LOG_DIR}/!{task.process}.versions
 fastq-scan -v >> ${LOG_DIR}/!{task.process}.versions 2>&1
-FINAL_BP=`gzip -cd quality-control/*.gz | fastq-scan | grep "total_bp" | sed -r 's/.*:[ ]*([0-9]+),/\1/'`
+FINAL_BP=`gzip -cd quality-control/*.gz | fastq-scan | grep "total_bp" | sed -r 's/.*:[ ]*([0-9]+),\\1/'`
 if [ ${FINAL_BP} -lt "!{params.min_basepairs}" ]; then
     ERROR=1
     echo "After QC, !{sample} FASTQ(s) contain ${FINAL_BP} total basepairs. This does
@@ -232,7 +232,7 @@ if [ ${FINAL_BP} -lt "!{params.min_basepairs}" ]; then
     sed 's/^\\s*//' > !{sample}-low-sequence-depth-error.txt
 fi
 
-FINAL_READS=`gzip -cd quality-control/*.gz | fastq-scan | grep "read_total" | sed -r 's/.*:[ ]*([0-9]+),/\1/'`
+FINAL_READS=`gzip -cd quality-control/*.gz | fastq-scan | grep "read_total" | sed -r 's/.*:[ ]*([0-9]+),/\\1/'`
 if [ ${FINAL_READS} -lt "!{params.min_reads}" ]; then
     ERROR=1
     echo "After QC, !{sample} FASTQ(s) contain ${FINAL_READS} total reads. This does
@@ -269,10 +269,10 @@ fi
     """
     mkdir quality-control
     mkdir ${task.process}
-    touch *-error.txt
+    touch ${sample}-error.txt
     touch quality-control/${sample}.fastq.gz
     touch quality-control/${sample}.error-fq.gz
-    touch ${task.process}/*
+    touch ${task.process}/${sample}
     """
 }
 

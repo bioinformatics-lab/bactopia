@@ -105,7 +105,7 @@ fi
     """
     mkdir ${method}
     mkdir ${task.process}
-    touch ${method}/*
-    touch ${task.process}/*
+    touch ${method}/${sample}
+    touch ${task.process}/${sample}
     """
 }

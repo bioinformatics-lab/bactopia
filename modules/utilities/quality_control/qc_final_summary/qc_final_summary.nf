@@ -73,8 +73,8 @@ fi
     """
     mkdir quality-control
     mkdir ${task.process}
-    touch quality-control/*
-    touch ${task.process}/*
+    touch quality-control/${sample}
+    touch ${task.process}/${sample}
     """
 }
 

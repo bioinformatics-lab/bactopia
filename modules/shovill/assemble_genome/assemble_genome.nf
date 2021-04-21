@@ -202,13 +202,13 @@ fi
     mkdir assembly
     mkdir fastqs
     mkdir ${task.process}
-    touch total_contigs_*
+    touch total_contigs_${sample}
     touch ${sample}-assembly-error.txt
     touch fastqs/${sample}.fastq.gz
-    touch assembly/*
+    touch assembly/${sample}
     touch assembly/${sample}.fna
     touch assembly/${sample}.fna.gz
-    touch ${task.process}/*
+    touch ${task.process}/${sample}
     """
 }
 

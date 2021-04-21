@@ -234,10 +234,10 @@ fi
     mkdir fastqs
     mkdir extra
     mkdir ${task.process}
-    touch *-error.txt
+    touch ${sample}-error.txt
     touch fastqs/${sample}.fastq.gz
-    touch extra/*.gz
-    touch ${task.process}/*
+    touch extra/${sample}.gz
+    touch ${task.process}/${sample}
     touch bactopia.versions
     touch multiple-read-sets-merged.txt
     """
