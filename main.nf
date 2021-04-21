@@ -8,6 +8,7 @@ import java.nio.file.Paths
 import nextflow.util.SysHelper
 PROGRAM_NAME = workflow.manifest.name
 VERSION = workflow.manifest.version
+nextflow.enable.dsl=2
 
 // Adjust memory/cpu requests for standard profile only
 MAX_MEMORY = ['standard', 'docker', 'singularity'].contains(workflow.profile) ? get_max_memory(params.max_memory).GB : (params.max_memory).GB
@@ -79,6 +80,24 @@ include { blast_genes } from './modules/blast'
 include { blast_primers } from './modules/blast'
 include { blast_proteins} from './modules/blast'
 include { mapping_query } from './modules/bwa'
+
+workflow {
+    gather_fastqs(create_input_channel(run_type))
+    fastq_status(gather_fastqs.out.FASTQ_PE_STATUS)
+    estimate_genome_size(fastq_status.out.ESTIMATE_GENOME_SIZE)
+    qc_reads(estimate_genome_size.out.QUALITY_CONTROL)
+    qc_original_summary(estimate_genome_size.out.QUALITY_CONTROL)
+    qc_final_summary(qc_reads.out.QC_FINAL_SUMMARY)
+    assemble_genome(qc_reads.out.ASSEMBLY)
+    assembly_qc(assemble_genome.out.ASSEMBLY_QC) // Fix channel from list
+    make_blastdb(assemble_genome.out.MAKE_BLASTDB)
+    annotate_genome(assemble_genome.out.ANNOTATION,PROKKA_PROTEINS,PRODIGAL_TF)
+    count_31mers(qc_reads.out.READS)
+    sequence_type(assemble_genome.out.SEQUENCE_TYPE,MLST_DATABASES)
+    ariba_analysis(qc_reads.out.READS,ARIBA_DATABASES)
+
+
+}
 
 
 workflow.onComplete {

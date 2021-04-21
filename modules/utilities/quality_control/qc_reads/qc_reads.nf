@@ -16,7 +16,7 @@ process qc_reads {
     file "*-error.txt" optional true
     file "quality-control/*"
     tuple val(sample), val(single_end),
-        file("quality-control/${sample}*.fastq.gz")//,emit: COUNT_31MERS, ARIBA_ANALYSIS,MINMER_SKETCH, CALL_VARIANTS,MAPPING_QUERY optional true
+        file("quality-control/${sample}*.fastq.gz"),emit: READS,optional: true//,emit: COUNT_31MERS, ARIBA_ANALYSIS,MINMER_SKETCH, CALL_VARIANTS,MAPPING_QUERY optional true
     tuple val(sample), val(sample_type), val(single_end),
         file("quality-control/${sample}*.fastq.gz"), file(extra),
         file(genome_size),emit: ASSEMBLY, optional: true

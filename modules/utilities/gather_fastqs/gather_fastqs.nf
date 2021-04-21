@@ -9,7 +9,7 @@ process gather_fastqs {
     tag "${sample}"
 
     input:
-    tuple val(sample), val(sample_type), val(single_end), file(r1: '*???-r1'), file(r2: '*???-r2'), file(extra)// from create_input_channel(run_type)
+    tuple val(sample), val(sample_type), val(single_end), file(r1: '*???-r1'), file(r2: '*???-r2'), file(extra)
 
     output:
     file("*-error.txt") optional true
