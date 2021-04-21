@@ -49,7 +49,7 @@ if [[ ! -L "!{fq[0]}" ]]; then
 fi
 
 avg_len=`seqtk fqchk !{fq[0]} | head -n 1 | sed -r 's/.*avg_len: ([0-9]+).*;.*/\\1/'`
-ls *.fasta | xargs -I {} grep -H "^>" {} | awk '{print $1}' | sed 's/.fasta:>/\t/' > mapping.txt
+ls *.fasta | xargs -I {} grep -H "^>" {} | awk '{print \$1}' | sed \\'s/.fasta:>/\t/' > mapping.txt
 cat *.fasta > multifasta.fa
 
 echo "# bwa Version" >> ${LOG_DIR}/!{task.process}.versions
