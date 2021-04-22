@@ -58,33 +58,34 @@ METHODS = Channel.fromList(['checkm', 'quast'])
 print_efficiency() 
 setup_datasets()
 
-include { gather_fastqs } from './modules/utilities'
-include { fastq_status } from './modules/utilities'
-include { estimate_genome_size } from './modules/mash'
-include { qc_reads } from './modules/utilities/quality_control'
-include { qc_original_summary } from './modules/utilities/quality_control'
-include { qc_final_summary } from './modules/utilities/quality_control'
-include { assemble_genome } from './modules/shovill'
-include { assembly_qc } from './modules/utilities/quality_control'
-include { make_blastdb } from './modules/blast'
-include { annotate_genome } from './modules/prokka'
-include { count_31mers } from './modules/mccortex'
-include { sequence_type } from './modules/utilities'
-include { ariba_analysis } from './modules/ariba'
-include { minmer_sketch } from './modules/minmer'
-include { minmer_query } from './modules/minmer'
-include { call_variants } from './modules/variant_calling' 
-include { download_references } from './modules/utilities'
-include { call_variants_auto } from './modules/variant_calling' 
-include { antimicrobial_resistance } from './modules/mash'
-include { plasmid_blast } from './modules/blast'
-include { blast_genes } from './modules/blast'
-include { blast_primers } from './modules/blast'
-include { blast_proteins} from './modules/blast'
-include { mapping_query } from './modules/bwa'
+include { gather_fastqs } from './modules/utilities/gather_fastqs/gather_fastqs'
+include { fastq_status } from './modules/utilities/fastq_status/fastq_status'
+include { estimate_genome_size } from './modules/mash/estimate_genome_size/estimate_genome_size'
+include { qc_reads } from './modules/utilities/quality_control/qc_reads/qc_reads'
+include { qc_original_summary } from './modules/utilities/quality_control/qc_original_summary/qc_original_summary'
+include { qc_final_summary } from './modules/utilities/quality_control/qc_final_summary/qc_final_summary'
+include { assemble_genome } from './modules/shovill/assemble_genome/assemble_genome'
+include { assembly_qc } from './modules/utilities/quality_control/assembly_qc/assembly_qc'
+include { make_blastdb } from './modules/blast/make_blastdb/make_blastdb'
+include { annotate_genome } from './modules/prokka/annotate_genome/annotate_genome'
+include { count_31mers } from './modules/mccortex/count_31mers/count_31mers'
+include { sequence_type } from './modules/utilities/sequence_type/sequence_type'
+include { ariba_analysis } from './modules/ariba/ariba_analysis/ariba_analysis'
+include { minmer_sketch } from './modules/minmer/minmer_sketch/minmer_sketch'
+include { minmer_query } from './modules/minmer/minmer_query/minmer_query'
+include { call_variants } from './modules/variant_calling/call_variants/call_variants' 
+include { download_references } from './modules/utilities/download_references/download_references'
+include { call_variants_auto } from './modules/variant_calling/call_variants_auto/call_variants_auto' 
+include { antimicrobial_resistance } from './modules/mash/antimicrobial_resistance/antimicrobial_resistance'
+include { plasmid_blast } from './modules/blast/plasmid_blast/plasmid_blast'
+include { blast_genes } from './modules/blast/blast_genes/blast_genes'
+include { blast_primers } from './modules/blast/blast_primers/blast_primers'
+include { blast_proteins} from './modules/blast/blast_proteins/blast_proteins'
+include { mapping_query } from './modules/bwa/mapping_query/mapping_query'
 
 workflow {
-    gather_fastqs(create_input_channel(run_type))
+    input_channel = create_input_channel(run_type)
+    gather_fastqs(input_channel)
     fastq_status(gather_fastqs.out.FASTQ_PE_STATUS)
     estimate_genome_size(fastq_status.out.ESTIMATE_GENOME_SIZE)
     qc_reads(estimate_genome_size.out.QUALITY_CONTROL)
@@ -108,7 +109,6 @@ workflow {
     blast_primers(make_blastdb.out.BLAST_DB,Channel.from(BLAST_PRIMER_FASTAS).collect())
     blast_proteins(make_blastdb.out.BLAST_DB,Channel.from(BLAST_PROTEIN_FASTAS).collect())
     mapping_query(qc_reads.out.READS,Channel.from(MAPPING_FASTAS).collect())
-
 }
 
 
