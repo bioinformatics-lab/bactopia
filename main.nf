@@ -84,8 +84,7 @@ include { blast_proteins} from './modules/blast/blast_proteins/blast_proteins'
 include { mapping_query } from './modules/bwa/mapping_query/mapping_query'
 
 workflow {
-    input_channel = create_input_channel(run_type)
-    gather_fastqs(input_channel)
+    gather_fastqs(create_input_channel(run_type))
     fastq_status(gather_fastqs.out.FASTQ_PE_STATUS)
     estimate_genome_size(fastq_status.out.ESTIMATE_GENOME_SIZE)
     qc_reads(estimate_genome_size.out.QUALITY_CONTROL)

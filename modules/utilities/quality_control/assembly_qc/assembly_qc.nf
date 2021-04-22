@@ -9,7 +9,7 @@ process assembly_qc {
 
     input:
     tuple val(sample), file(fasta), file(genome_size)
-    each method from Channel.fromList(['checkm', 'quast'])
+    each method
 
     output:
     file "${method}/*"
