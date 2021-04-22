@@ -12,7 +12,7 @@ process make_blastdb {
 
     output:
     file("blastdb/*")
-    tuple val(sample), file("blastdb/*"), emit: BLAST_GENES, optional:true
+    tuple val(sample), file("blastdb/*"), emit: BLAST_DB, optional:true
     file "${task.process}/*" optional true
 
     shell:

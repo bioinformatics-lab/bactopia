@@ -53,7 +53,7 @@ REFSEQ_SKETCH = []
 REFSEQ_SKETCH_FOUND = false
 SPECIES = format_species(params.species)
 SPECIES_GENOME_SIZE = null
-METHODS = Channel.fromList(['checkm', 'quast'])
+METHODS = Channel.of(['checkm', 'quast'])
 
 print_efficiency() 
 setup_datasets()
@@ -84,7 +84,7 @@ include { blast_proteins} from './modules/blast/blast_proteins/blast_proteins'
 include { mapping_query } from './modules/bwa/mapping_query/mapping_query'
 
 workflow {
-    gather_fastqs(create_input_channel(run_type))
+    gather_fastqs(Channel.from(create_input_channel(run_type)))
     fastq_status(gather_fastqs.out.FASTQ_PE_STATUS)
     estimate_genome_size(fastq_status.out.ESTIMATE_GENOME_SIZE)
     qc_reads(estimate_genome_size.out.QUALITY_CONTROL)
@@ -93,21 +93,21 @@ workflow {
     assemble_genome(qc_reads.out.ASSEMBLY)
     make_blastdb(assemble_genome.out.MAKE_BLASTDB)
     assembly_qc(assemble_genome.out.ASSEMBLY_QC, METHODS) // Needs Fix???
-    annotate_genome(assemble_genome.out.ANNOTATION,Channel.from(PROKKA_PROTEINS),Channel.from(PRODIGAL_TF))
+    annotate_genome(assemble_genome.out.ANNOTATION,Channel.of(PROKKA_PROTEINS),Channel.of(PRODIGAL_TF))
     count_31mers(qc_reads.out.READS)
-    sequence_type(assemble_genome.out.SEQUENCE_TYPE,Channel.from(MLST_DATABASES)
-    ariba_analysis(qc_reads.out.READS,Channel.from(ARIBA_DATABASES))
+    sequence_type(assemble_genome.out.SEQUENCE_TYPE,Channel.of(MLST_DATABASES))
+    ariba_analysis(qc_reads.out.READS,Channel.of(ARIBA_DATABASES))
     minmer_sketch(qc_reads.out.READS)
-    minmer_query(minmer_sketch.out.MINMER_QUERY,Channel.from(MINMER_DATABASES))
-    call_variants(qc_reads.out.READS,Channel.from(REFERENCES))
-    download_references(minmer_sketch.out.DOWNLOAD_REFERENCES,Channel.from(REFSEQ_SKETCH))
+    minmer_query(minmer_sketch.out.MINMER_QUERY,Channel.of(MINMER_DATABASES))
+    call_variants(qc_reads.out.READS,Channel.of(REFERENCES))
+    download_references(minmer_sketch.out.DOWNLOAD_REFERENCES,Channel.of(REFSEQ_SKETCH))
     call_variants_auto(download_references.out.CALL_VARIANTS_AUTO)
-    antimicrobial_resistance(annotate_genome.out.ANTIMICROBIAL_RESISTANCE,Channel.from(AMR_DATABASES))
-    plasmid_blast(annotate_genome.out.PLASMID_BLAST,Channel.from(PLASMID_BLASTDB))
-    blast_genes(make_blastdb.out.BLAST_DB,Channel.from(BLAST_GENE_FASTAS).collect())
-    blast_primers(make_blastdb.out.BLAST_DB,Channel.from(BLAST_PRIMER_FASTAS).collect())
-    blast_proteins(make_blastdb.out.BLAST_DB,Channel.from(BLAST_PROTEIN_FASTAS).collect())
-    mapping_query(qc_reads.out.READS,Channel.from(MAPPING_FASTAS).collect())
+    antimicrobial_resistance(annotate_genome.out.ANTIMICROBIAL_RESISTANCE,Channel.of(AMR_DATABASES))
+    plasmid_blast(annotate_genome.out.PLASMID_BLAST,Channel.of(PLASMID_BLASTDB))
+    blast_genes(make_blastdb.out.BLAST_DB,Channel.of(BLAST_GENE_FASTAS).collect())
+    blast_primers(make_blastdb.out.BLAST_DB,Channel.of(BLAST_PRIMER_FASTAS).collect())
+    blast_proteins(make_blastdb.out.BLAST_DB,Channel.of(BLAST_PROTEIN_FASTAS).collect())
+    mapping_query(qc_reads.out.READS,Channel.of(MAPPING_FASTAS).collect())
 }
 
 
