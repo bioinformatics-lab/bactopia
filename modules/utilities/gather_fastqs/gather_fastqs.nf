@@ -230,6 +230,7 @@ fi
 
     '''    
     stub:
+    final_sample_type = 'single-end'
     """
     mkdir fastqs
     mkdir extra
