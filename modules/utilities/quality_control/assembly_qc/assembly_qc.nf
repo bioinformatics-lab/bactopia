@@ -109,3 +109,20 @@ fi
     touch ${task.process}/${sample}
     """
 }
+
+//###############
+//Module testing 
+//###############
+
+
+workflow test{
+    
+    TEST_PARAMS_CH = Channel.of([
+        params.sample, 
+        params.fasta,
+        params.genome_size            
+        ])
+    TEST_PARAMS_CH2 = Channel.of(['checkm', 'quast'])
+
+    assembly_qc(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+}
