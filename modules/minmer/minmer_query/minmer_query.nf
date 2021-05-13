@@ -12,7 +12,7 @@ process minmer_query {
 
     input:
     tuple val(sample), val(single_end), file(fq), file(sourmash)
-    each file(dataset)
+    each dataset
 
     output:
     file "*.txt"

@@ -9,7 +9,7 @@ process sequence_type {
 
     input:
     tuple val(sample), val(single_end), file(fq), file(assembly)
-    each file(dataset)
+    each dataset
 
     output:
     file "${method}/*"

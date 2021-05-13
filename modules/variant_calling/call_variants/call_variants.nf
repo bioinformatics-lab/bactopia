@@ -12,7 +12,7 @@ process call_variants {
 
     input:
     tuple val(sample), val(single_end), file(fq)
-    each file(reference)
+    each reference
 
     output:
     file "${reference_name}/*"

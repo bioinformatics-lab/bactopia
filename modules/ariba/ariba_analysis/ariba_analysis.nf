@@ -9,7 +9,7 @@ process ariba_analysis {
 
     input:
     tuple val(sample), val(single_end), file(fq)
-    each file(dataset)
+    each dataset
 
     output:
     file "${dataset_name}/*"
