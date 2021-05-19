@@ -2,7 +2,7 @@ outdir:
   "test_output"
   
 sample:
-  "test_data/SRR2838702"
+  "SRR2838702"
 
 sample_type:
   "paired-end"
