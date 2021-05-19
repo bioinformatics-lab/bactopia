@@ -52,7 +52,8 @@ process gather_fastqs {
         final_sample_type = 'single-end'
     }
 
-    template "gather_fastqs.sh"    
+    template "gather_fastqs.sh"
+
     stub:
     final_sample_type = 'single-end'
     """
@@ -80,7 +81,7 @@ workflow test{
         params.single_end,
         params.run_type,
         params.r1,
-        params.r2             
+        params.r2,           
         ])
 
     gather_fastqs(test_params_input)
