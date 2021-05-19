@@ -79,9 +79,9 @@ workflow test{
         params.sample, 
         params.sample_type, 
         params.single_end,
-        params.run_type,
         params.r1,
-        params.r2,           
+        params.r2,
+        params.extra           
         ])
 
     gather_fastqs(test_params_input)
