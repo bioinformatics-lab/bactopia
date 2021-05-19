@@ -16,6 +16,9 @@ r1:
 r2:
   "test_data/SRR2838702_R2.fastq.gz"
 
+extra:
+  "test_data/extra.fastq.gz"
+
 publish_mode:
   "copy"
 

@@ -17,7 +17,7 @@ fq:
   "test_data/SRR2838702_R1.fastq.gz"
 
 dataset:
-  "test_data/dataset.fna.gz"
+  "../../../../../../../datasets/ariba/*.tar.gz"
 
 assembly:
   "test_data/assembly.fna.gz" 

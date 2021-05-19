@@ -24,8 +24,7 @@ process ariba_analysis {
     spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
     noclean = params.ariba_no_clean ? "--noclean" : ""
     
-    template(task.ext.template)
-
+    template "ariba_analysis.sh"
     stub:
     dataset_tarball = file(dataset).getName()
     dataset_name = dataset_tarball.replace('.tar.gz', '')
