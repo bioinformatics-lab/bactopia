@@ -11,4 +11,7 @@ Using DSL2 each module can be tested separately, using a test workflow inside th
 
 ## How to test it:
 
-$ nextflow run estimate_genome_size.nf -entry test -params-file test_params.yaml -profile test
+$ nextflow run estimate_genome_size.nf -profile test,docker -params-file test_params.yaml -entry test
+
+
+if you've used `bactopia conda activate` you can also trade `docker` by `conda` to test with conda. 
