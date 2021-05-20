@@ -27,3 +27,12 @@ version:
 
 overwrite:
   "some_value"
+
+max_genome_size:
+  '18040666'
+  
+min_genome_size:
+  '100000'
+
+skip_logs:
+  false
