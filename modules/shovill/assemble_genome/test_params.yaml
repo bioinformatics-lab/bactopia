@@ -14,7 +14,7 @@ single_end:
   "false"
 
 fq:
-  "test_data/SRR2838702_R1.fastq.gz"
+  "test_data/SRR2838702_R{1,2}.fastq.gz"
 
 extra:
   "test_data/empty.fna.gz"
@@ -32,55 +32,53 @@ overwrite:
   "some_value"
 
 shovill_opts:
-  ""
+  null
 
 shovill_kmers:
-  ""
+  null
 
 nostitch:
-  ""
+  null
 
 nocorr:
-  ""
+  null
 
 no_miniasm:
-  ""
+  false
 
 no_rotate:
-  " "
+  false
 
 no_pilon:
-  ""
+  false
 
 min_contig_len:
-  ""
+  500
 
 unicycler_mode:
-  ""
+  "normal"
 
 min_polish_size:
-  ""
+  10000
 
 min_component_size:
-  ""
+  1000
 
 min_dead_end_size:
-  ""
+  1000
 
 compress:
-  ""
+  false
 
 assembler:
-  ""
+  'skesa'
 
 min_contig_cov:
-  ""
+  2
 
 contig_namefmt:
-  ""
+  'contig%05d'
 
 min_genome_size:
-  ""
-
-
+  '100000'
 
