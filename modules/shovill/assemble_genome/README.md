@@ -11,4 +11,8 @@ Using DSL2 each module can be tested separately, using a test workflow inside th
 
 ## How to test it:
 
-$ nextflow run asssemble_genome.nf -entry test -params-file test_params.yaml -profile test
+$ nextflow run asssemble_genome.nf -params-file test_params.yaml -profile test,docker -entry test
+
+
+if you've used `bactopia conda activate` you can also trade `docker` by conda to test with conda. 
+
