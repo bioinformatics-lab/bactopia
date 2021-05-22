@@ -14,7 +14,7 @@ single_end:
   "false"
 
 fq:
-  "test_data/SRR2838702_R{1,2}.fastq.gz"
+  ["test_data/SRR2838702_R1.fastq.gz","test_data/SRR2838702_R2.fastq.gz"]
 
 extra:
   "test_data/empty.fna.gz"
@@ -87,3 +87,9 @@ keep_all_files:
 
 reassemble:
   false
+
+skip_logs:
+  false
+
+shovill_ram:
+  4
