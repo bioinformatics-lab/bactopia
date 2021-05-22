@@ -82,3 +82,8 @@ contig_namefmt:
 min_genome_size:
   '100000'
 
+keep_all_files:
+  false
+
+reassemble:
+  false
