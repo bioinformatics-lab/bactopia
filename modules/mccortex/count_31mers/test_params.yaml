@@ -11,7 +11,7 @@ single_end:
   "false"
 
 fq:
-  "test_data/SRR2838702_R1.fastq.gz"
+  ["test_data/SRR2838702_R1.fastq.gz", "test_data/SRR2838702_R2.fastq.gz"]
 
 publish_mode:
   "copy"
@@ -23,4 +23,13 @@ version:
   "1.6.0"
 
 overwrite:
-  "some_value"
+  false
+
+cortex_ram:
+  2
+
+keep_singletons:
+  false
+
+skip_logs:
+  false
