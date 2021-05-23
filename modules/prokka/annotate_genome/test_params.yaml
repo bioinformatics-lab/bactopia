@@ -43,56 +43,47 @@ version:
 overwrite:
   "some_value"
 
-shovill_opts:
-  ""
+compress:
+  false
 
-shovill_kmers:
-  ""
+skip_logs:
+  false
 
-nostitch:
-  ""
+skip_prodigal_tf:
+  false
 
-nocorr:
-  ""
+compliant:
+  false
 
-no_miniasm:
-  ""
+centre:
+  'Bactopia'
 
-no_rotate:
-  " "
+nogenes:
+  false
 
-no_pilon:
-  ""
+addmrna:
+  false
+
+rawproduct:
+  null
+
+cdsrnaolap:
+  null
+
+norrna:
+  null
+
+notrna:
+  null
+
+rnammer:
+  null
+
+prokka_evalue:
+  '1e-09'
+
+prokka_coverage:
+  '80'
 
 min_contig_len:
-  ""
-
-unicycler_mode:
-  ""
-
-min_polish_size:
-  ""
-
-min_component_size:
-  ""
-
-min_dead_end_size:
-  ""
-
-compress:
-  ""
-
-assembler:
-  ""
-
-min_contig_cov:
-  ""
-
-contig_namefmt:
-  ""
-
-min_genome_size:
-  ""
-
-
-
+  500
