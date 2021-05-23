@@ -47,9 +47,6 @@ workflow test {
         params.single_end, 
         params.fq         
         ])
-    TEST_PARAMS_CH2 = Channel.of([
-        params.dataset
-        ])
-
+    TEST_PARAMS_CH2 = Channel.of(file("${baseDir}/../../../datasets/ariba/card.tar.gz"),file("${baseDir}/../../../datasets/ariba/vdfb_core.tar.gz"))
     ariba_analysis(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }

@@ -11,19 +11,10 @@ sample_type:
   "paired-end"
 
 single_end:
-  "test"
+  false
 
 fq:
-  "test_data/SRR2838702_R1.fastq.gz"
-
-dataset:
-  "../../../../../../../datasets/ariba/*.tar.gz"
-
-assembly:
-  "test_data/assembly.fna.gz" 
-
-mlst:
-  "test_data/mlst.fasta.gz"
+  ["test_data/SRR2838702_R1.fastq.gz","test_data/SRR2838702_R2.fastq.gz"]
 
 publish_mode:
   "copy"
@@ -36,3 +27,39 @@ version:
 
 overwrite:
   "some_value"
+keep_all_files:
+  false
+
+skip_logs:
+  false
+
+nucmer_min_id:
+  90
+
+nucmer_min_len:
+  20
+
+nucmer_breaklen:
+  200
+
+assembly_cov:
+  50
+
+min_scaff_depth:
+  10
+
+spades_options:
+  null
+
+assembled_threshold:
+  0.95
+
+gene_nt_extend:
+  30
+
+unique_threshold:
+  0.03
+
+ariba_no_clean: 
+    false
+    
