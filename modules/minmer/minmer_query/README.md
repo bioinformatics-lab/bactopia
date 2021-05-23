@@ -1,6 +1,7 @@
-# download_references process testing:
+# minmer_query process testing:
 
-This process downloads the nearest RefSeq genomes (based on Mash) to have variants called against.
+This process queryies minmer sketches against pre-computed RefSeq (Mash, k=21) and
+    GenBank (Sourmash, k=21,31,51)
 
 ## About testing this process:
 
@@ -11,4 +12,7 @@ Using DSL2 each module can be tested separately, using a test workflow inside th
 
 ## How to test it:
 
-$ nextflow run download_references.nf -entry test -params-file test_params.yaml -profile test
+$ nextflow run minmer_query.nf -params-file test_params.yaml -profile test,docker -entry test
+
+
+if you've used `bactopia conda activate` you can also trade `docker` by conda to test with conda. 
