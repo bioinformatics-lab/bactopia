@@ -52,8 +52,8 @@ workflow test{
         params.fq,
         params.assembly
         ])
-    TEST_PARAMS_CH2 = Channel.of([
-        params.dataset])
+    TEST_PARAMS_CH2 = Channel.of(
+        file(params.dataset))
     MLST_DATABASES = Channel.of([
         params.mlst])
 
