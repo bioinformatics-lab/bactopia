@@ -14,10 +14,10 @@ single_end:
   "test"
 
 fq:
-  "test_data/SRR2838702_R1.fastq.gz"
+  ["test_data/SRR2838702_R1.fastq.gz","test_data/SRR2838702_R2.fastq.gz"]
 
 dataset:
-  "test_data/dataset.fna.gz"
+  "test_data/dataset-test.fna.gz"
 
 assembly:
   "test_data/assembly.fna.gz" 
@@ -35,4 +35,40 @@ version:
   "1.6.0"
 
 overwrite:
-  "some_value"
+  false
+
+spades_options:
+  null
+
+ariba_no_clean:
+  false
+
+compress:
+  false
+
+nucmer_min_id:
+  90
+
+nucmer_min_len:
+  20
+
+nucmer_breaklen:
+  200
+
+assembly_cov:
+  50
+
+min_scaff_depth:
+  10
+
+assembled_threshold:
+  0.95
+
+gene_nt_extend:
+  30
+
+unique_threshold:
+  0.03
+
+skip_logs:
+  false
