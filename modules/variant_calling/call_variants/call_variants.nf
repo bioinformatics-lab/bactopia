@@ -49,8 +49,8 @@ workflow test {
         params.single_end, 
         params.fq,
         ])
-    TEST_PARAMS_CH2 = Channel.of([
-        params.reference
-        ])
+    TEST_PARAMS_CH2 = Channel.of(
+        file(params.reference)
+        )
     call_variants(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }
