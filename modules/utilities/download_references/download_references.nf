@@ -54,9 +54,9 @@ workflow test {
         params.fq,
         params.sample_sketch
         ])
-    TEST_PARAMS_CH2 = Channel.of([
+    TEST_PARAMS_CH2 = Channel.of(
         params.refseq_sketch
-        ])
+        )
     download_references(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }
 
