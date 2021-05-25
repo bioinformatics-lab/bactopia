@@ -1,3 +1,5 @@
+nextflow.enable.dsl = 2
+
 process mapping_query {
     /*
     Map FASTQ reads against a given set of FASTA files using BWA.
@@ -9,7 +11,7 @@ process mapping_query {
 
     input:
     tuple val(sample), val(single_end), file(fq)
-    file(query)
+    each query
 
     output:
     file "mapping/*"
@@ -42,10 +44,10 @@ workflow test{
     TEST_PARAMS_CH = Channel.of([
         params.sample, 
         params.single_end,
-        params.fq,
+        params.fq
         ])
-    TEST_PARAMS_CH2 = Channel.of([
-        params.query
-        ])
-    annotate_genome(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+    TEST_PARAMS_CH2 = Channel.of(
+        file(params.query)
+        )
+    mapping_query(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }
