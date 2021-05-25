@@ -1,7 +1,6 @@
 # minmer_query process testing:
 
-This process queryies minmer sketches against pre-computed RefSeq (Mash, k=21) and
-    GenBank (Sourmash, k=21,31,51)
+This process queries minmer sketches against pre-computed RefSeq (Mash, k=21) and GenBank (Sourmash, k=21,31,51)
 
 ## About testing this process:
 

@@ -1,6 +1,6 @@
 # minmer_sketch process testing:
 
-This process create minmer sketches of the input FASTQs using Mash (k=21,31) and Sourmash (k=21,31,51)
+This process creates minmer sketches of the input FASTQs using Mash (k=21,31) and Sourmash (k=21,31,51)
 
 ## About testing this process:
 
@@ -11,4 +11,7 @@ Using DSL2 each module can be tested separately, using a test workflow inside th
 
 ## How to test it:
 
-$ nextflow run minmer_sketch.nf -entry test -params-file test_params.yaml -profile test
+$ nextflow run minmer_sketch.nf -params-file test_params.yaml -profile test,docker -entry test
+
+
+if you've used `bactopia conda activate` you can also trade `docker` by conda to test with conda. 
