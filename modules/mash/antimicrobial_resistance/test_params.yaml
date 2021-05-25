@@ -17,7 +17,7 @@ proteins:
   "test_data/proteins.fasta.gz"
 
 amrdb:
-  "test_data/amrdb.fasta.gz"
+  "test_data/amrfinderdb.tar.gz"
 
 publish_mode:
   "copy"
@@ -31,27 +31,29 @@ version:
 overwrite:
   "some_value"
 
-amr_plus:
-  ""
-
-amr_report_common:
-  ""
-
-amr_organism:
-  ""
-
-compress:
-  ""
+update_amr:
+  false
 
 amr_ident_min:
-  ""
+  -1
 
 amr_coverage_min:
-  ""
+  0.5
+
+amr_organism:
+  null
 
 amr_translation_table:
-  ""
+  11
+
+amr_plus:
+  false
+
+amr_report_common:
+  false
 
 skip_logs:
-  ""
-  
+  false
+
+compress:
+  false

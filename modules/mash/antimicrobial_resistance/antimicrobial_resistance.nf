@@ -50,8 +50,8 @@ workflow test {
         params.genes, 
         params.proteins
         ])
-    TEST_PARAMS_CH2 = Channel.of([
+    TEST_PARAMS_CH2 = Channel.of(
         params.amrdb
-        ])
+        )
     antimicrobial_resistance(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }
