@@ -1,6 +1,6 @@
-# blast_proteins process testing:
+# plasmid_blast process testing:
 
-This process queries protein FASTA files against annotated assembly using BLAST
+This process BLAST a set of predicted genes against the PLSDB BLAST database
 
 ## About testing this process:
 
@@ -11,7 +11,7 @@ Using DSL2 each module can be tested separately, using a test workflow inside th
 
 ## How to test it:
 
-$ nextflow run blast_proteins.nf -params-file test_params.yaml -profile test,docker -entry test
+$ nextflow run plasmid_blast.nf -params-file test_params.yaml -profile test,docker -entry test
 
 
 if you've used `bactopia conda activate` you can also trade `docker` by conda to test with conda. 

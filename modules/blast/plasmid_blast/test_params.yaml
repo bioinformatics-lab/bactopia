@@ -8,7 +8,10 @@ sample:
   "TEST_SAMPLE"
 
 single_end:
-  false
+  "test"
+
+fasta:
+  "test_data/test_database.fasta"
 
 publish_mode:
   "copy"
@@ -19,11 +22,11 @@ run_type:
 version:
   "1.6.0"
 
-blastdb:
-  "test_data/blastdb.fasta"
+genes:
+  "test_data/genes.fasta"
 
-query:
-  "test_data/query.fasta"
+blastdb_files:
+  "test_data/blastdb_files.{nhr,nin,nog,nsd,nsi,nsq}"
 
 overwrite:
   false

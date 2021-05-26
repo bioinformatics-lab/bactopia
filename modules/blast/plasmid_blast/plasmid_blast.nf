@@ -43,9 +43,9 @@ workflow test {
         params.sample, 
         params.genes,          
         ])
-    TEST_PARAMS_CH2 = Channel.of([
+    TEST_PARAMS_CH2 = Channel.of(
         params.blastdb_files
-        ])
+        )
 
     plasmid_blast(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }
