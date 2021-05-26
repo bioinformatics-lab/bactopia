@@ -1,0 +1,45 @@
+genome_size:
+  "test_data/genome-size.txt"
+
+outdir:
+  "test_output"
+  
+sample:
+  "TEST_SAMPLE"
+
+single_end:
+  false
+
+
+publish_mode:
+  "copy"
+
+run_type:
+  "fastqs"
+
+version:
+  "1.6.0"
+
+blastdb:
+  "test_data/blastdb.fasta"
+
+query:
+  "test_data/query.fasta"
+
+overwrite:
+  false
+
+compress:
+  false
+
+skip_logs:
+  false
+
+perc_identity:
+  50
+
+qcov_hsp_perc:
+  50
+
+max_target_seqs:
+  2000

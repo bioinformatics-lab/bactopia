@@ -42,9 +42,9 @@ workflow test {
         params.sample, 
         params.blastdb,          
         ])
-    TEST_PARAMS_CH2 = Channel.of([
+    TEST_PARAMS_CH2 = Channel.of(
         params.query
-        ])
+        )
 
     blast_proteins(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }
