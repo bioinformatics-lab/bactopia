@@ -42,8 +42,8 @@ workflow test {
         params.sample, 
         params.sample_type, 
         params.single_end,
-        params.fq,
-        params.extra             
+        file(params.fq),
+        file(params.extra)             
         ])
 
     estimate_genome_size(TEST_PARAMS_CH)
