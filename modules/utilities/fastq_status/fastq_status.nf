@@ -39,8 +39,8 @@ workflow test{
         params.sample, 
         params.sample_type, 
         params.single_end,
-        params.fq,
-        params.extra             
+        file(params.fq),
+        file(params.extra)             
         ])
 
     fastq_status(TEST_PARAMS_CH)
