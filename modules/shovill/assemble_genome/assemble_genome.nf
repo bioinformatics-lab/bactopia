@@ -52,18 +52,18 @@ process assemble_genome {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test{
-    
+
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.sample_type, 
+        params.sample,
+        params.sample_type,
         params.single_end,
-        params.fq,
-        params.extra, 
-        params.genome_size            
+        file(params.fq),
+        file(params.extra),
+        file(params.genome_size)
         ])
 
     assemble_genome(TEST_PARAMS_CH)
