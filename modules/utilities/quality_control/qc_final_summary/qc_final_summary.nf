@@ -15,7 +15,7 @@ process qc_final_summary {
     file "${task.process}/*" optional true
 
     shell:
-    
+
     template "qc_final_summary.sh"
 
     stub:
@@ -28,16 +28,16 @@ process qc_final_summary {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test{
-    
+
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
+        params.sample,
         params.single_end,
-        params.fq,
-        params.genome_size            
+        file(params.fq),
+        file(params.genome_size)
         ])
 
     qc_final_summary(TEST_PARAMS_CH)
