@@ -31,16 +31,16 @@ process assembly_qc {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 
 workflow test{
-    
+
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.fasta,
-        params.genome_size            
+        params.sample,
+        file(params.fasta),
+        file(params.genome_size)
         ])
     TEST_PARAMS_CH2 = Channel.of('checkm', 'quast')
 

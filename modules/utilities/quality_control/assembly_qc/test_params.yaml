@@ -1,6 +1,6 @@
 outdir:
   "test_output"
-  
+
 sample:
   "SRR2838702"
 
@@ -11,10 +11,7 @@ single_end:
   "false"
 
 fasta:
-  "test_data/assemby.fasta"
-
-extra:
-  "test_data/empty.fna.gz"
+  "test_data/SRR2838702.fna"
 
 genome_size:
   "test_data/genome-size.txt"
@@ -64,23 +61,23 @@ skip_checkm:
 checkm_unique:
   10
 
-checkm_multi: 
+checkm_multi:
   10
 
-aai_strain: 
+aai_strain:
   0.9
 
-checkm_length: 
+checkm_length:
   0.7
 
-compress: 
+compress:
   false
 
-contig_thresholds: 
+contig_thresholds:
   '0,1000,10000,100000,250000,1000000'
-  
-plots_format: 
+
+plots_format:
   'pdf'
 
-skip_logs: 
+skip_logs:
   false
