@@ -28,16 +28,16 @@ process make_blastdb {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test{
-    
+
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.single_end, 
-        params.fasta          
-        ])
+        params.sample,
+        params.single_end,
+        file(params.fasta)
+    ])
 
     make_blastdb(TEST_PARAMS_CH)
 }
