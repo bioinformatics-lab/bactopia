@@ -26,15 +26,15 @@ process count_31mers {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test{
-    
+
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        params.fq
+        file(params.fq)
         ])
 
     count_31mers(TEST_PARAMS_CH)
