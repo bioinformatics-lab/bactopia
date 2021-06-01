@@ -9,7 +9,7 @@ process ariba_analysis {
 
     input:
     tuple val(sample), val(single_end), file(fq)
-    each dataset
+    each file(dataset)
 
     output:
     file "${dataset_name}/*"
@@ -23,7 +23,7 @@ process ariba_analysis {
     dataset_name = dataset_tarball.replace('.tar.gz', '')
     spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
     noclean = params.ariba_no_clean ? "--noclean" : ""
-    
+
     template "ariba_analysis.sh"
     stub:
     dataset_tarball = file(dataset).getName()
@@ -37,16 +37,15 @@ process ariba_analysis {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
-//ARIBA_DATASETS = Channel.of([file("${dataset_path}/ariba/${it.name}")])
 workflow test {
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.single_end, 
-        params.fq         
+        params.sample,
+        params.single_end,
+        file(params.fq)
         ])
-    TEST_PARAMS_CH2 = Channel.of(file("${baseDir}/../../../datasets/ariba/card.tar.gz"),file("${baseDir}/../../../datasets/ariba/vdfb_core.tar.gz"))
-    ariba_analysis(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+    TEST_PARAMS_CH2 = Channel.of(file(params.card),file(params.vfdb))
+    ariba_analysis(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }

@@ -1,10 +1,7 @@
-genome_size:
-  "test_data/genome-size.txt"
-
 outdir:
   "test_output"
-  
-sample:
+
+sample
   "TEST_SAMPLE"
 
 sample_type:
@@ -14,7 +11,14 @@ single_end:
   false
 
 fq:
-  ["test_data/SRR2838702_R1.fastq.gz","test_data/SRR2838702_R2.fastq.gz"]
+    "test_data/SRR2838702_R{1,2}.fastq.gz"
+
+card:
+  "test_data/card.tar.gz"
+
+vfdb:
+  "test_data/vfdb_core.tar.gz"
+
 
 publish_mode:
   "copy"
@@ -60,6 +64,5 @@ gene_nt_extend:
 unique_threshold:
   0.03
 
-ariba_no_clean: 
-    false
-    
+ariba_no_clean:
+  false
