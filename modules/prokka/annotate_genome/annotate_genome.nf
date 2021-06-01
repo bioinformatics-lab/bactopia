@@ -76,23 +76,23 @@ process annotate_genome {
 
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test{
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
+        params.sample,
         params.single_end,
-        params.fq, 
-        params.fasta,
-        params.total_contigs
+        file(params.fq),
+        file(params.fasta),
+        file(params.total_contigs)
         ])
-    TEST_PARAMS_CH2 = Channel.of([
-        params.prokka_proteins
-        ])
-    TEST_PARAMS_CH3 = Channel.of([
-        params.prodigal_tf
-        ])
+    TEST_PARAMS_CH2 = Channel.of(
+        file(params.prokka_proteins)
+        )
+    TEST_PARAMS_CH3 = Channel.of(
+        file(params.prodigal_tf)
+        )
 
     annotate_genome(TEST_PARAMS_CH,TEST_PARAMS_CH2,TEST_PARAMS_CH3)
 }

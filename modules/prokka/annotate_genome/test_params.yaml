@@ -1,12 +1,10 @@
 species:
   "Escherichia coli"
 
-genome_size:
-  "test_data/genome_size.txt"
 
 outdir:
   "test_output"
-  
+
 sample:
   "TEST_SAMPLE"
 
@@ -17,19 +15,19 @@ single_end:
   "test"
 
 fq:
-  "test_data/SRR2838702_R1.fastq.gz"
+  "test_data/SRR2838702_R{1,2}.fastq.gz"
 
 fasta:
-  "test_data/SRR2838702.fasta.gz"
+  "test_data/SRR2838702.fna"
 
 total_contigs:
-  "test_data/total_contigs.txt"
+  "test_data/total_contigs"
 
 prokka_proteins:
-  "test_data/prokka_proteins.fasta.gz"
+  "test_data/EMPTY_PROTEINS"
 
 prodigal_tf:
-  "test_data/prodigal_tf.fasta.gz"
+  "test_data/EMPTY_TF"
 
 publish_mode:
   "copy"
