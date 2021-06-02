@@ -1,9 +1,6 @@
-genome_size:
-  "test_data/genome-size.txt"
-
 outdir:
   "test_output"
-  
+
 sample:
   "TEST_SAMPLE"
 
@@ -11,10 +8,10 @@ single_end:
   "test"
 
 genes:
-  "test_data/genes.fasta.gz"
+    "test_data/SRR2838702.ffn"
 
 proteins:
-  "test_data/proteins.fasta.gz"
+   "test_data/SRR2838702.faa"
 
 amrdb:
   "test_data/amrfinderdb.tar.gz"

@@ -41,17 +41,17 @@ process antimicrobial_resistance {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test {
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.genes, 
-        params.proteins
+        params.sample,
+        file(params.genes),
+        file(params.proteins)
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        params.amrdb
+        file(params.amrdb)
         )
-    antimicrobial_resistance(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+    antimicrobial_resistance(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }
