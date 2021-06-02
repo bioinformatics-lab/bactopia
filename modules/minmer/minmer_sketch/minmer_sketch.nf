@@ -22,7 +22,7 @@ process minmer_sketch {
     shell:
     fastq = single_end ? fq[0] : "${fq[0]} ${fq[1]}"
     template "minmer_sketch.sh"
-    
+
     stub:
     """
     mkdir fastqs
@@ -36,14 +36,14 @@ process minmer_sketch {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test {
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.single_end, 
-        params.fq         
+        params.sample,
+        params.single_end,
+        file(params.fq)
         ])
 
     minmer_sketch(TEST_PARAMS_CH)
