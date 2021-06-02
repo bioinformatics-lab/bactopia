@@ -1,9 +1,6 @@
-genome_size:
-  "test_data/genome-size.txt"
-
 outdir:
   "test_output"
-  
+
 sample:
   "TEST_SAMPLE"
 
@@ -11,10 +8,22 @@ single_end:
   "SRR2838702"
 
 fq:
-  ["test_data/SRR2838702_R1.fastq.gz","test_data/SRR2838702_R2.fastq.gz"]
+  "test_data/SRR2838702_R{1,2}.fastq.gz"
 
 sourmash:
-  "test_data/test.sig"
+  "test_data/SRR2838702.sig"
+
+k21:
+  "test_data/genbank-k21.json.gz"
+
+k31:
+  "test_data/genbank-k31.json.gz"
+
+k51:
+  "test_data/genbank-k51.json.gz"
+
+refseqk21:
+  "test_data/refseq-k21-s1000.msh"
 
 publish_mode:
   "copy"

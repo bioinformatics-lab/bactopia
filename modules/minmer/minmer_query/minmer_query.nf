@@ -12,7 +12,7 @@ process minmer_query {
 
     input:
     tuple val(sample), val(single_end), file(fq), file(sourmash)
-    each dataset
+    each file(dataset)
 
     output:
     file "*.txt"
@@ -37,16 +37,16 @@ process minmer_query {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test {
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.single_end, 
-        params.fq,   
-        params.sourmash
-        ])
-    TEST_PARAMS_CH2 = Channel.of(file("${baseDir}/../../../datasets/minmer/genbank-k21.json.gz"))
-    minmer_query(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+        params.sample,
+        params.single_end,
+        file(params.fq),
+        file(params.sourmash)
+    ])
+    TEST_PARAMS_CH2 = Channel.of(file(params.k21),file(params.k31),file(params.k51),file(params.refseqk21))
+    minmer_query(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }
