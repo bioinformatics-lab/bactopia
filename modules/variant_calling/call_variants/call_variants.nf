@@ -12,7 +12,7 @@ process call_variants {
 
     input:
     tuple val(sample), val(single_end), file(fq)
-    each reference
+    each file(reference)
 
     output:
     file "${reference_name}/*"
@@ -28,7 +28,7 @@ process call_variants {
     bwaopt = params.bwaopt ? "--bwaopt 'params.bwaopt'" : ""
     fbopt = params.fbopt ? "--fbopt 'params.fbopt'" : ""
     template "call_variants.sh"
-    
+
     stub:
     reference_name = reference.getSimpleName()
     """
@@ -40,17 +40,17 @@ process call_variants {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test {
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.single_end, 
-        params.fq,
+        params.sample,
+        params.single_end,
+        file(params.fq),
         ])
     TEST_PARAMS_CH2 = Channel.of(
         file(params.reference)
         )
-    call_variants(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+    call_variants(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect)
 }
