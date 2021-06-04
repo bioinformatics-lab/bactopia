@@ -9,7 +9,7 @@ process sequence_type {
 
     input:
     tuple val(sample), val(single_end), file(fq), file(assembly)
-    each dataset
+    each file(dataset)
 
     output:
     file "${method}/*"
@@ -41,11 +41,11 @@ process sequence_type {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test{
-    
+
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
@@ -53,9 +53,8 @@ workflow test{
         params.assembly
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        file(params.dataset))
-    MLST_DATABASES = Channel.of([
-        params.mlst])
+        file(params.dataset_blast)
+        file(params.dataset_ariba))
 
-    sequence_type(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+    sequence_type(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }

@@ -1,29 +1,26 @@
-genome_size:
-  "test_data/genome-size.txt"
-
 outdir:
   "test_output"
-  
+
 sample:
-  "TEST_SAMPLE"
+  "SRR2838702"
 
 sample_type:
   "paired-end"
 
 single_end:
-  "test"
+  "false"
 
 fq:
-  ["test_data/SRR2838702_R1.fastq.gz","test_data/SRR2838702_R2.fastq.gz"]
+  "test_data/SRR2838702_R{1,2}.fastq.gz"
 
-dataset:
-  "test_data/dataset-test.fna.gz"
+dataset_blast:
+  "test_data/default-blastdb.tar.gz"
+
+dataset_ariba:
+  "test_data/default-ariba.tar.gz"
 
 assembly:
-  "test_data/assembly.fna.gz" 
-
-mlst:
-  "test_data/mlst.fasta.gz"
+  "test_data/SRR2838702.fna.gz"
 
 publish_mode:
   "copy"
