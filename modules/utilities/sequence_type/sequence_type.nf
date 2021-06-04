@@ -49,8 +49,8 @@ workflow test{
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        params.fq,
-        params.assembly
+        file(params.fq),
+        file(params.assembly)
         ])
     TEST_PARAMS_CH2 = Channel.of(
         file(params.dataset_blast)
