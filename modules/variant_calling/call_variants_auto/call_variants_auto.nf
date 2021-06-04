@@ -23,8 +23,8 @@ process call_variants_auto {
     fastq = single_end ? "--se ${fq[0]}" : "--R1 ${fq[0]} --R2 ${fq[1]}"
     bwaopt = params.bwaopt ? "--bwaopt 'params.bwaopt'" : ""
     fbopt = params.fbopt ? "--fbopt 'params.fbopt'" : ""
-    templates "call_variants_auto.sh"
-    
+    template "call_variants_auto.sh"
+
     stub:
     reference_name = "ref_name"
     """
@@ -38,15 +38,15 @@ process call_variants_auto {
 
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test {
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.single_end, 
-        params.fq,
-        params.reference
+        params.sample,
+        params.single_end,
+        file(params.fq),
+        file(params.reference)
         ])
     call_variants_auto(TEST_PARAMS_CH)
 }
