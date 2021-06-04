@@ -44,18 +44,18 @@ process download_references {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test {
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.single_end, 
-        params.fq,
-        params.sample_sketch
+        params.sample,
+        params.single_end,
+        file(params.fq),
+        file(params.sample_sketch)
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        params.refseq_sketch
+        file(params.refseq_sketch)
         )
     download_references(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }

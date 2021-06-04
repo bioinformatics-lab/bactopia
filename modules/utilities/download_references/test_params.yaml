@@ -1,23 +1,20 @@
-genome_size:
-  "test_data/genome-size.txt"
-
 outdir:
   "test_output"
-  
+
 sample:
-  "TEST_SAMPLE"
+  "SRR2838702"
 
 single_end:
   false
 
 fq:
-  "test_data/SRR2838702_R1.fastq.gz"
+  "test_data/SRR2838702_R{1,2}.fastq.gz"
 
 sample_sketch:
-  "test_data/sample_sketch.sig"
+  "test_data/SRR2838702-k31.msh"
 
 refseq_sketch:
-  "test_data/refseq_sketch.sig"
+  "test_data/refseq-genomes.msh"
 
 publish_mode:
   "copy"
