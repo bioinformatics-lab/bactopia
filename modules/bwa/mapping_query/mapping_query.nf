@@ -11,7 +11,7 @@ process mapping_query {
 
     input:
     tuple val(sample), val(single_end), file(fq)
-    each query
+    each file(query)
 
     output:
     file "mapping/*"
@@ -37,17 +37,17 @@ process mapping_query {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test{
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
+        params.sample,
         params.single_end,
-        params.fq
+        file(params.fq)
         ])
     TEST_PARAMS_CH2 = Channel.of(
         file(params.query)
         )
-    mapping_query(TEST_PARAMS_CH,TEST_PARAMS_CH2)
+    mapping_query(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }
