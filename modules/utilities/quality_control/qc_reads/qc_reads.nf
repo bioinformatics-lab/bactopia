@@ -32,7 +32,7 @@ process qc_reads {
     qin = sample_type.startsWith('assembly') ? 'qin=33' : 'qin=auto'
     adapters = params.adapters ? file(params.adapters) : 'adapters'
     phix = params.phix ? file(params.phix) : 'phix'
-    
+
     template "qc_reads.sh"
 
     stub:
@@ -48,19 +48,18 @@ process qc_reads {
 
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test{
-    
-    TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.sample_type, 
-        params.single_end,
-        params.fq,
-        params.extra, 
-        params.genome_size            
-        ])
 
+    TEST_PARAMS_CH = Channel.of([
+        params.sample,
+        params.sample_type,
+        params.single_end,
+        file(params.fq),
+        file(params.extra),
+        file(params.genome_size)
+    ])
     qc_reads(TEST_PARAMS_CH)
 }
