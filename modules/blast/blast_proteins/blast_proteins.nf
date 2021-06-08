@@ -12,6 +12,7 @@ process blast_proteins {
     input:
     tuple val(sample), file(blastdb)
     file(query)
+
     output:
     file("proteins/*.{json,json.gz}")
     file "${task.process}/*" optional true
@@ -20,7 +21,7 @@ process blast_proteins {
     BLAST_PROTEIN_FASTAS.isEmpty() == false
 
     shell:
-    
+
     template "blast_proteins.sh"
 
     stub:
@@ -34,16 +35,16 @@ process blast_proteins {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test {
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.blastdb,          
+        params.sample,
+        file(params.blastdb),
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        params.query
+        file(params.query)
         )
 
     blast_proteins(TEST_PARAMS_CH,TEST_PARAMS_CH2)
