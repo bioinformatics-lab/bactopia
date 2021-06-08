@@ -34,16 +34,16 @@ process blast_primers {
 }
 
 //###############
-//Module testing 
+//Module testing
 //###############
 
 workflow test {
     TEST_PARAMS_CH = Channel.of([
-        params.sample, 
-        params.blastdb,          
+        params.sample,
+        file(params.blastdb),
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        params.query
+        file(params.query)
         )
 
     blast_primers(TEST_PARAMS_CH,TEST_PARAMS_CH2)

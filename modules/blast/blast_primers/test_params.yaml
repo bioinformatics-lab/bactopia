@@ -1,17 +1,12 @@
-genome_size:
-  "test_data/genome-size.txt"
-
 outdir:
   "test_output"
-  
+
 sample:
-  "TEST_SAMPLE"
+  "SRR2838702"
 
 single_end:
   false
 
-fasta:
-  "test_data/test_database.fasta"
 
 publish_mode:
   "copy"
@@ -23,10 +18,10 @@ version:
   "1.6.0"
 
 blastdb:
-  "test_data/blastdb.fasta"
+  "test_data/SRR2838702*"
 
 query:
-  "test_data/query.fasta"
+  "test_data/dumb-primer.fasta"
 
 overwrite:
   false
