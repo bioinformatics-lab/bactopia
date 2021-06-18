@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process ariba_analysis {
+process ARIBA_ANALYSIS {
     /* Run reads against all available (if any) ARIBA datasets */
     tag "${sample} - ${dataset_name}"
 

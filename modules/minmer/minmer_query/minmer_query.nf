@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process minmer_query {
+process MINMER_QUERY {
     /*
     Query minmer sketches against pre-computed RefSeq (Mash, k=21) and
     GenBank (Sourmash, k=21,31,51)

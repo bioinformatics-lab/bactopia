@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process blast_genes {
+process BLAST_GENES {
     /*
     Query gene FASTA files against annotated assembly using BLAST
     */

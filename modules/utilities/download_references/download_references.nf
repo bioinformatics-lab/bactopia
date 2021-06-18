@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process download_references {
+process DOWNLOAD_REFERENCES {
     /*
     Download the nearest RefSeq genomes (based on Mash) to have variants called against.
 

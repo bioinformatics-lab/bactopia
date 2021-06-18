@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process mapping_query {
+process MAPPING_QUERY {
     /*
     Map FASTQ reads against a given set of FASTA files using BWA.
     */

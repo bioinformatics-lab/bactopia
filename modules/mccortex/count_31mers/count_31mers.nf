@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process count_31mers {
+process COUNT_31MERS {
     /* Count 31mers in the reads using McCortex */
     tag "${sample}"
 

@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process blast_proteins {
+process BLAST_PROTEINS {
     /*
     Query protein FASTA files against annotated assembly using BLAST
     */

@@ -1,7 +1,7 @@
 
 nextflow.enable.dsl = 2
 
-process qc_reads {
+process QC_READS {
     /* Cleanup the reads using Illumina-Cleanup */
     tag "${sample}"
 

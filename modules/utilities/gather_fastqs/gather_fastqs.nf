@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process gather_fastqs {
+process GATHER_FASTQS {
     /* Gather up input FASTQs for analysis. */
     publishDir "${params.outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
     publishDir "${params.outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "bactopia.versions"

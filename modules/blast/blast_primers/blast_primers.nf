@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process blast_primers {
+process BLAST_PRIMERS {
     /*
     Query primer FASTA files against annotated assembly using BLAST
     */

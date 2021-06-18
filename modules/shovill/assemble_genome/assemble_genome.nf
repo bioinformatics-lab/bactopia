@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process assemble_genome {
+process ASSEMBLE_GENOME {
     /* Assemble the genome using Shovill, SKESA is used by default */
     tag "${sample}"
 

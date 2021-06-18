@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process call_variants_auto {
+process CALL_VARIANTS_AUTO {
     /*
     Identify variants (SNPs/InDels) against one or more reference genomes selected based
     on their Mash distance from the input.

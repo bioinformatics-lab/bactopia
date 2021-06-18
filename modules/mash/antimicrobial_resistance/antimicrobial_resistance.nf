@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process antimicrobial_resistance {
+process ANTIMICROBIAL_RESISTANCE {
     /*
     Query nucleotides and proteins (SNPs/InDels) against one or more reference genomes selected based
     on their Mash distance from the input.

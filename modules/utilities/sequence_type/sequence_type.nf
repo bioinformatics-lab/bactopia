@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process sequence_type {
+process SEQUENCE_TYPE {
     /* Determine MLST types using ARIBA and BLAST */
     tag "${sample} - ${schema} - ${method}"
 

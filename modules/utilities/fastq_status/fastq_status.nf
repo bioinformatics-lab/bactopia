@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process fastq_status {
+process FASTQ_STATUS {
     /* Determine if FASTQs are PE or SE, and if they meet minimum basepair/read counts. */
     publishDir "${params.outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
     publishDir "${params.outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: '*.txt'

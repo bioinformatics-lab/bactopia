@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process plasmid_blast {
+process PLASMID_BLAST {
     /*
     BLAST a set of predicted genes against the PLSDB BLAST database.
     */

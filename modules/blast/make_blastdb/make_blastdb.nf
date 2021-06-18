@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process make_blastdb {
+process MAKE_BLASTDB {
     /* Create a BLAST database of the assembly using BLAST */
     tag "${sample}"
 

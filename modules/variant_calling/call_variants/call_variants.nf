@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process call_variants {
+process CALL_VARIANTS {
     /*
     Identify variants (SNPs/InDels) against a set of reference genomes
     using Snippy.

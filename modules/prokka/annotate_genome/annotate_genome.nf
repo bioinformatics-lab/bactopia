@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process annotate_genome {
+process ANNOTATE_GENOME {
     /* Annotate the assembly using Prokka, use a proteins FASTA if available */
     tag "${sample}"
 

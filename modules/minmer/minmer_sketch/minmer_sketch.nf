@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process minmer_sketch {
+process MINMER_SKETCH {
     /*
     Create minmer sketches of the input FASTQs using Mash (k=21,31) and
     Sourmash (k=21,31,51)

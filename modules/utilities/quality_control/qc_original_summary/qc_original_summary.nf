@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process qc_original_summary {
+process QC_ORIGINAL_SUMMARY {
     /* Run FASTQC on the input FASTQ files. */
     tag "${sample}"
 

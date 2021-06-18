@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process estimate_genome_size {
+process ESTIMATE_GENOME_SIZE {
     /* Estimate the input genome size if not given. */
     tag "${sample}"
 

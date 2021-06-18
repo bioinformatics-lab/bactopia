@@ -1,6 +1,6 @@
 nextflow.enable.dsl = 2
 
-process assembly_qc {
+process ASSEMBLY_QC {
     /* Assess the quality of the assembly using QUAST and CheckM */
     tag "${sample} - ${method}"
 
