@@ -1,14 +1,14 @@
 #! /usr/bin/env nextflow
-
 import groovy.json.JsonSlurper
 import groovy.text.SimpleTemplateEngine
 import groovy.util.FileNameByRegexFinder
+import java.io.RandomAccessFile;
+import java.util.zip.GZIPInputStream;
 import java.nio.file.Path
 import java.nio.file.Paths
 import nextflow.util.SysHelper
 PROGRAM_NAME = workflow.manifest.name
 VERSION = workflow.manifest.version
-nextflow.enable.dsl=2
 
 // Adjust memory/cpu requests for standard profile only
 MAX_MEMORY = ['standard', 'docker', 'singularity'].contains(workflow.profile) ? get_max_memory(params.max_memory).GB : (params.max_memory).GB
@@ -46,68 +46,663 @@ BLAST_GENE_FASTAS = []
 BLAST_PRIMER_FASTAS = []
 BLAST_PROTEIN_FASTAS = []
 MAPPING_FASTAS = []
-PLASMID_BLASTDB = []
 PROKKA_PROTEINS = file(params.empty_proteins)
 PRODIGAL_TF = file(params.empty_tf)
 REFSEQ_SKETCH = []
 REFSEQ_SKETCH_FOUND = false
 SPECIES = format_species(params.species)
 SPECIES_GENOME_SIZE = null
-METHODS = Channel.of(['checkm', 'quast'])
-
-print_efficiency() 
+print_efficiency()
 setup_datasets()
 
-include { gather_fastqs } from './modules/utilities/gather_fastqs/gather_fastqs'
-include { fastq_status } from './modules/utilities/fastq_status/fastq_status'
-include { estimate_genome_size } from './modules/mash/estimate_genome_size/estimate_genome_size'
-include { qc_reads } from './modules/utilities/quality_control/qc_reads/qc_reads'
-include { qc_original_summary } from './modules/utilities/quality_control/qc_original_summary/qc_original_summary'
-include { qc_final_summary } from './modules/utilities/quality_control/qc_final_summary/qc_final_summary'
-include { assemble_genome } from './modules/shovill/assemble_genome/assemble_genome'
-include { assembly_qc } from './modules/utilities/quality_control/assembly_qc/assembly_qc'
-include { make_blastdb } from './modules/blast/make_blastdb/make_blastdb'
-include { annotate_genome } from './modules/prokka/annotate_genome/annotate_genome'
-include { count_31mers } from './modules/mccortex/count_31mers/count_31mers'
-include { sequence_type } from './modules/utilities/sequence_type/sequence_type'
-include { ariba_analysis } from './modules/ariba/ariba_analysis/ariba_analysis'
-include { minmer_sketch } from './modules/minmer/minmer_sketch/minmer_sketch'
-include { minmer_query } from './modules/minmer/minmer_query/minmer_query'
-include { call_variants } from './modules/variant_calling/call_variants/call_variants' 
-include { download_references } from './modules/utilities/download_references/download_references'
-include { call_variants_auto } from './modules/variant_calling/call_variants_auto/call_variants_auto' 
-include { antimicrobial_resistance } from './modules/mash/antimicrobial_resistance/antimicrobial_resistance'
-include { plasmid_blast } from './modules/blast/plasmid_blast/plasmid_blast'
-include { blast_genes } from './modules/blast/blast_genes/blast_genes'
-include { blast_primers } from './modules/blast/blast_primers/blast_primers'
-include { blast_proteins} from './modules/blast/blast_proteins/blast_proteins'
-include { mapping_query } from './modules/bwa/mapping_query/mapping_query'
 
-workflow {
-    gather_fastqs(Channel.from(create_input_channel(run_type)))
-    fastq_status(gather_fastqs.out.FASTQ_PE_STATUS)
-    estimate_genome_size(fastq_status.out.ESTIMATE_GENOME_SIZE)
-    qc_reads(estimate_genome_size.out.QUALITY_CONTROL)
-    qc_original_summary(estimate_genome_size.out.QUALITY_CONTROL)
-    qc_final_summary(qc_reads.out.QC_FINAL_SUMMARY)
-    assemble_genome(qc_reads.out.ASSEMBLY)
-    make_blastdb(assemble_genome.out.MAKE_BLASTDB)
-    assembly_qc(assemble_genome.out.ASSEMBLY_QC, METHODS) // Needs Fix???
-    annotate_genome(assemble_genome.out.ANNOTATION,Channel.of(PROKKA_PROTEINS),Channel.of(PRODIGAL_TF))
-    count_31mers(qc_reads.out.READS)
-    sequence_type(assemble_genome.out.SEQUENCE_TYPE,Channel.of(MLST_DATABASES))
-    ariba_analysis(qc_reads.out.READS,Channel.of(ARIBA_DATABASES))
-    minmer_sketch(qc_reads.out.READS)
-    minmer_query(minmer_sketch.out.MINMER_QUERY,Channel.of(MINMER_DATABASES))
-    call_variants(qc_reads.out.READS,Channel.of(REFERENCES))
-    download_references(minmer_sketch.out.DOWNLOAD_REFERENCES,Channel.of(REFSEQ_SKETCH))
-    call_variants_auto(download_references.out.CALL_VARIANTS_AUTO)
-    antimicrobial_resistance(annotate_genome.out.ANTIMICROBIAL_RESISTANCE,Channel.of(AMR_DATABASES))
-    plasmid_blast(annotate_genome.out.PLASMID_BLAST,Channel.of(PLASMID_BLASTDB))
-    blast_genes(make_blastdb.out.BLAST_DB,Channel.of(BLAST_GENE_FASTAS).collect())
-    blast_primers(make_blastdb.out.BLAST_DB,Channel.of(BLAST_PRIMER_FASTAS).collect())
-    blast_proteins(make_blastdb.out.BLAST_DB,Channel.of(BLAST_PROTEIN_FASTAS).collect())
-    mapping_query(qc_reads.out.READS,Channel.of(MAPPING_FASTAS).collect())
+process gather_fastqs {
+    /* Gather up input FASTQs for analysis. */
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "bactopia.versions"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: '*.txt'
+
+    tag "${sample}"
+
+    input:
+    set val(sample), val(sample_type), val(single_end), file(r1: '*???-r1'), file(r2: '*???-r2'), file(extra) from create_input_channel(run_type)
+
+    output:
+    file "*-error.txt" optional true
+    set val(sample), val(final_sample_type), val(single_end),
+        file("fastqs/${sample}*.fastq.gz"), file("extra/*.gz") optional true into FASTQ_PE_STATUS
+    file "${task.process}/*" optional true
+    file "bactopia.versions" optional true
+    file "multiple-read-sets-merged.txt" optional true
+
+    shell:
+    bactopia_version = VERSION
+    nextflow_version = nextflow.version
+    is_assembly = sample_type.startsWith('assembly') ? true : false
+    is_compressed = false
+    no_cache = params.no_cache ? '-N' : ''
+    use_ena = params.use_ena
+    if (task.attempt >= 4) {
+        if (use_ena) {
+            // Try SRA
+            use_ena = false
+        } else {
+            // Try ENA
+            use_ena = true
+        }
+    }
+    if (extra) {
+        is_compressed = extra.getName().endsWith('gz') ? true : false
+    }
+    section = null
+    if (sample_type == 'assembly_accession') {
+        section = sample.startsWith('GCF') ? 'refseq' : 'genbank'
+    }
+    fcov = params.coverage.toInteger() == 0 ? 150 : Math.round(params.coverage.toInteger() * 1.5)
+    final_sample_type = sample_type
+    if (sample_type == 'hybrid-merge-pe') {
+        final_sample_type = 'hybrid'
+    } else if (sample_type == 'merge-pe') {
+        final_sample_type = 'paired-end'
+    } else if (sample_type == 'merge-se') {
+        final_sample_type = 'single-end'
+    }
+    template(task.ext.template)
+}
+
+process fastq_status {
+    /* Determine if FASTQs are PE or SE, and if they meet minimum basepair/read counts. */
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: '*.txt'
+
+    input:
+    set val(sample), val(sample_type), val(single_end), file(fq), file(extra) from FASTQ_PE_STATUS
+
+    output:
+    file "*-error.txt" optional true
+    set val(sample), val(sample_type), val(single_end),
+        file("fastqs/${sample}*.fastq.gz"), file(extra) optional true into ESTIMATE_GENOME_SIZE
+    file "${task.process}/*" optional true
+
+    shell:
+    single_end = fq[1] == null ? true : false
+    qin = sample_type.startsWith('assembly') ? 'qin=33' : 'qin=auto'
+    template(task.ext.template)
+}
+
+process estimate_genome_size {
+    /* Estimate the input genome size if not given. */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: '*.txt'
+
+    input:
+    set val(sample), val(sample_type), val(single_end), file(fq), file(extra) from ESTIMATE_GENOME_SIZE
+
+    output:
+    file "${sample}-genome-size-error.txt" optional true
+    file("${sample}-genome-size.txt") optional true
+    set val(sample), val(sample_type), val(single_end),
+        file("fastqs/${sample}*.fastq.gz"), file(extra), file("${sample}-genome-size.txt") optional true into QC_READS, QC_ORIGINAL_SUMMARY
+    file "${task.process}/*" optional true
+
+    shell:
+    genome_size = SPECIES_GENOME_SIZE
+    template(task.ext.template)
+}
+
+process qc_reads {
+    /* Cleanup the reads using Illumina-Cleanup */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "quality-control/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*error.txt"
+
+    input:
+    set val(sample), val(sample_type), val(single_end), file(fq), file(extra), file(genome_size) from QC_READS
+
+    output:
+    file "*-error.txt" optional true
+    file "quality-control/*"
+    set val(sample), val(single_end),
+        file("quality-control/${sample}*.fastq.gz") optional true into COUNT_31MERS, ARIBA_ANALYSIS,
+                                                                       MINMER_SKETCH, CALL_VARIANTS,
+                                                                       MAPPING_QUERY
+    set val(sample), val(sample_type), val(single_end),
+        file("quality-control/${sample}*.fastq.gz"), file(extra),
+        file(genome_size) optional true into ASSEMBLY
+
+    set val(sample), val(single_end),
+        file("quality-control/${sample}*.{fastq,error-fq}.gz"),
+        file(genome_size) optional true into QC_FINAL_SUMMARY
+    file "${task.process}/*" optional true
+
+    shell:
+    qc_ram = task.memory.toString().split(' ')[0]
+    is_assembly = sample_type.startsWith('assembly') ? true : false
+    qin = sample_type.startsWith('assembly') ? 'qin=33' : 'qin=auto'
+    adapters = params.adapters ? file(params.adapters) : 'adapters'
+    phix = params.phix ? file(params.phix) : 'phix'
+    template(task.ext.template)
+}
+
+process qc_original_summary {
+    /* Run FASTQC on the input FASTQ files. */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "quality-control/*"
+
+    input:
+    set val(sample), val(sample_type), val(single_end), file(fq), file(extra), file(genome_size) from QC_ORIGINAL_SUMMARY
+
+    output:
+    file "quality-control/*"
+    file "${task.process}/*" optional true
+
+    shell:
+    template(task.ext.template)
+}
+
+process qc_final_summary {
+    /* Run FASTQC on the cleaned up FASTQ files. */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "quality-control/*"
+
+    input:
+    set val(sample), val(single_end), file(fq), file(genome_size) from QC_FINAL_SUMMARY
+
+    output:
+    file "quality-control/*"
+    file "${task.process}/*" optional true
+
+    shell:
+    template(task.ext.template)
+}
+
+
+process assemble_genome {
+    /* Assemble the genome using Shovill, SKESA is used by default */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "assembly/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${sample}-assembly-error.txt"
+
+    input:
+    set val(sample), val(sample_type), val(single_end), file(fq), file(extra), file(genome_size) from ASSEMBLY
+
+    output:
+    file "assembly/*"
+    file "${sample}-assembly-error.txt" optional true
+    set val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("assembly/${sample}.{fna,fna.gz}") optional true into SEQUENCE_TYPE
+    set val(sample), val(single_end), file("assembly/${sample}.{fna,fna.gz}") optional true into MAKE_BLASTDB
+    set val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("assembly/${sample}.{fna,fna.gz}"), file("total_contigs_*") optional true into ANNOTATION
+    set val(sample), file("assembly/${sample}.{fna,fna.gz}"), file(genome_size) optional true into ASSEMBLY_QC
+    file "${task.process}/*" optional true
+
+    shell:
+    contig_namefmt = params.contig_namefmt ? params.contig_namefmt : "${sample}_%05d"
+    shovill_ram = task.memory.toString().split(' ')[0]
+    opts = params.shovill_opts ? "--opts '${params.shovill_opts}'" : ""
+    kmers = params.shovill_kmers ? "--kmers '${params.shovill_kmers}'" : ""
+    nostitch = params.nostitch ? "--nostitch" : ""
+    nocorr = params.nocorr ? "--nocorr" : ""
+    no_miniasm = params.no_miniasm ? "--no_miniasm" : ""
+    no_rotate = params.no_rotate ? "--no_rotate" : ""
+    no_pilon = params.no_pilon ? "--no_pilon" : ""
+    keep = params.keep_all_files ? "--keep 3" : "--keep 1"
+    use_original_assembly = null
+    if (sample_type.startsWith('assembly')) {
+        use_original_assembly = params.reassemble ? false : true
+    }
+    template(task.ext.template)
+}
+
+process assembly_qc {
+    /* Assess the quality of the assembly using QUAST and CheckM */
+    tag "${sample} - ${method}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/assembly", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${method}/*"
+
+    input:
+    set val(sample), file(fasta), file(genome_size) from ASSEMBLY_QC
+    each method from Channel.fromList(['checkm', 'quast'])
+
+    output:
+    file "${method}/*"
+    file "${task.process}/*" optional true
+
+    shell:
+    //CheckM Related
+    full_tree = params.full_tree ? '' : '--reduced_tree'
+    checkm_ali = params.checkm_ali ? '--ali' : ''
+    checkm_nt = params.checkm_nt ? '--nt' : ''
+    force_domain = params.force_domain ? '--force_domain' : ''
+    no_refinement = params.no_refinement ? '--no_refinement' : ''
+    individual_markers = params.individual_markers ? '--individual_markers' : ''
+    skip_adj_correction = params.skip_adj_correction ? '--skip_adj_correction' : ''
+    skip_pseudogene_correction = params.skip_pseudogene_correction ? '--skip_pseudogene_correction' : ''
+    ignore_thresholds = params.ignore_thresholds ? '--ignore_thresholds' : ''
+    template(task.ext.template)
+}
+
+
+process make_blastdb {
+    /* Create a BLAST database of the assembly using BLAST */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/blast", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "blastdb/*"
+
+    input:
+    set val(sample), val(single_end), file(fasta) from MAKE_BLASTDB
+
+    output:
+    file("blastdb/*")
+    set val(sample), file("blastdb/*") into BLAST_GENES, BLAST_PRIMERS, BLAST_PROTEINS
+    file "${task.process}/*" optional true
+
+    shell:
+    template(task.ext.template)
+}
+
+
+process annotate_genome {
+    /* Annotate the assembly using Prokka, use a proteins FASTA if available */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "annotation/${sample}*"
+
+    input:
+    set val(sample), val(single_end), file(fq), file(fasta), file(total_contigs) from ANNOTATION
+    file prokka_proteins from PROKKA_PROTEINS
+    file prodigal_tf from PRODIGAL_TF
+
+    output:
+    file "annotation/${sample}*"
+    set val(sample), file("annotation/${sample}.{ffn,ffn.gz}") optional true into PLASMID_BLAST
+    set val(sample),
+        file("annotation/${sample}.{ffn,ffn.gz}"),
+        file("annotation/${sample}.{faa,faa.gz}") optional true into ANTIMICROBIAL_RESISTANCE
+    file "${task.process}/*" optional true
+
+    shell:
+    gunzip_fasta = fasta.getName().replace('.gz', '')
+    contig_count = total_contigs.getName().replace('total_contigs_', '')
+    genus = "Genus"
+    species = "species"
+    proteins = ""
+    if (prokka_proteins.getName() != 'EMPTY_PROTEINS') {
+        proteins = "--proteins ${prokka_proteins}"
+        if (SPECIES.contains("-")) {
+            genus = SPECIES.split('-')[0].capitalize()
+            species = SPECIES.split('-')[1]
+        } else {
+            genus = SPECIES.capitalize()
+            species = "spp."
+        }
+    }
+
+    prodigal = ""
+    if (prodigal_tf.getName() != 'EMPTY_TF' && !params.skip_prodigal_tf) {
+        prodigal = "--prodigaltf ${prodigal_tf}"
+    }
+
+    compliant = params.compliant ? "--compliant" : ""
+    locustag = "--locustag ${sample}"
+    renamed = false
+    // Contig ID must <= 37 characters
+    if ("gnl|${params.centre}|${sample}_${contig_count}".length() > 37) {
+        locustag = ""
+        compliant = "--compliant"
+        renamed = true
+    }
+    addgenes = params.nogenes ? "" : "--addgenes"
+    addmrna = params.addmrna ? "--addmrna" : ""
+    rawproduct = params.rawproduct ? "--rawproduct" : ""
+    cdsrnaolap = params.cdsrnaolap ? "--cdsrnaolap" : ""
+    norrna = params.norrna ? "--norrna" : ""
+    notrna = params.notrna ? "--notrna" : ""
+    rnammer = params.rnammer ? "--rnammer" : ""
+    rfam = params.rnammer ? "--rfam" : ""
+    template(task.ext.template)
+}
+
+
+process count_31mers {
+    /* Count 31mers in the reads using McCortex */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/kmers", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*.ctx"
+
+    input:
+    set val(sample), val(single_end), file(fq) from COUNT_31MERS
+
+    output:
+    file "${sample}.ctx"
+    file "${task.process}/*" optional true
+
+    shell:
+    m = task.memory.toString().split(' ')[0].toInteger() * 1000 - 500
+    template(task.ext.template)
+}
+
+
+process sequence_type {
+    /* Determine MLST types using ARIBA and BLAST */
+    tag "${sample} - ${schema} - ${method}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/mlst/${schema}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${method}/*"
+
+    input:
+    set val(sample), val(single_end), file(fq), file(assembly) from SEQUENCE_TYPE
+    each file(dataset) from MLST_DATABASES
+
+    output:
+    file "${method}/*"
+    file "${task.process}/*" optional true
+
+    when:
+    MLST_DATABASES.isEmpty() == false
+
+    shell:
+    method = dataset =~ /.*blastdb.*/ ? 'blast' : 'ariba'
+    dataset_tarball = file(dataset).getName()
+    dataset_name = dataset_tarball.replace('.tar.gz', '').split('-')[1]
+    schema = dataset_tarball.split('-')[0]
+    noclean = params.ariba_no_clean ? "--noclean" : ""
+    spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
+    template(task.ext.template)
+}
+
+
+process ariba_analysis {
+    /* Run reads against all available (if any) ARIBA datasets */
+    tag "${sample} - ${dataset_name}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/ariba", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${dataset_name}/*"
+
+    input:
+    set val(sample), val(single_end), file(fq) from ARIBA_ANALYSIS
+    each file(dataset) from ARIBA_DATABASES
+
+    output:
+    file "${dataset_name}/*"
+    file "${task.process}/*" optional true
+
+    when:
+    single_end == false && ARIBA_DATABASES.isEmpty() == false
+
+    shell:
+    dataset_tarball = file(dataset).getName()
+    dataset_name = dataset_tarball.replace('.tar.gz', '')
+    spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
+    noclean = params.ariba_no_clean ? "--noclean" : ""
+    template(task.ext.template)
+}
+
+
+process minmer_sketch {
+    /*
+    Create minmer sketches of the input FASTQs using Mash (k=21,31) and
+    Sourmash (k=21,31,51)
+    */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/minmers", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*.{msh,sig}"
+
+    input:
+    set val(sample), val(single_end), file(fq) from MINMER_SKETCH
+
+    output:
+    file("${sample}*.{msh,sig}")
+    set val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("${sample}.sig") into MINMER_QUERY
+    set val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("${sample}-k31.msh") into DOWNLOAD_REFERENCES
+    file "${task.process}/*" optional true
+
+    shell:
+    fastq = single_end ? fq[0] : "${fq[0]} ${fq[1]}"
+    template(task.ext.template)
+}
+
+
+process minmer_query {
+    /*
+    Query minmer sketches against pre-computed RefSeq (Mash, k=21) and
+    GenBank (Sourmash, k=21,31,51)
+    */
+    tag "${sample} - ${dataset_name}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/minmers", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*.txt"
+
+    input:
+    set val(sample), val(single_end), file(fq), file(sourmash) from MINMER_QUERY
+    each file(dataset) from MINMER_DATABASES
+
+    output:
+    file "*.txt"
+    file "${task.process}/*" optional true
+
+    when:
+    MINMER_DATABASES.isEmpty() == false
+
+    shell:
+    dataset_name = dataset.getName()
+    mash_w = params.screen_w ? "-w" : ""
+    fastq = single_end ? fq[0] : "${fq[0]} ${fq[1]}"
+    template(task.ext.template)
+}
+
+
+process call_variants {
+    /*
+    Identify variants (SNPs/InDels) against a set of reference genomes
+    using Snippy.
+    */
+    tag "${sample} - ${reference_name}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/variants/user", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${reference_name}/*"
+
+    input:
+    set val(sample), val(single_end), file(fq) from CALL_VARIANTS
+    each file(reference) from REFERENCES
+
+    output:
+    file "${reference_name}/*"
+    file "${task.process}/*" optional true
+
+    when:
+    REFERENCES.isEmpty() == false
+
+    shell:
+    snippy_ram = task.memory.toString().split(' ')[0]
+    reference_name = reference.getSimpleName()
+    fastq = single_end ? "--se ${fq[0]}" : "--R1 ${fq[0]} --R2 ${fq[1]}"
+    bwaopt = params.bwaopt ? "--bwaopt 'params.bwaopt'" : ""
+    fbopt = params.fbopt ? "--fbopt 'params.fbopt'" : ""
+    template(task.ext.template)
+}
+
+
+process download_references {
+    /*
+    Download the nearest RefSeq genomes (based on Mash) to have variants called against.
+
+    Exitcode 75 is due to being unable to download from NCBI (e.g. FTP down at the time)
+    Downloads will be attempted 300 times total before giving up. On failure to download
+    variants will not be called against the nearest completed genome.
+    */
+    tag "${sample} - ${params.max_references} reference(s)"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/variants/auto", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: 'mash-dist.txt'
+
+    input:
+    set val(sample), val(single_end), file(fq), file(sample_sketch) from DOWNLOAD_REFERENCES
+    file(refseq_sketch) from REFSEQ_SKETCH
+
+    output:
+    set val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("genbank/*.gbk") optional true into CALL_VARIANTS_AUTO
+    file("mash-dist.txt")
+    file "${task.process}/*" optional true
+
+    when:
+    REFSEQ_SKETCH_FOUND == true
+
+    shell:
+    no_cache = params.no_cache ? '-N' : ''
+    tie_break = params.random_tie_break ? "--random_tie_break" : ""
+    total = params.max_references
+    template(task.ext.template)
+}
+
+
+process call_variants_auto {
+    /*
+    Identify variants (SNPs/InDels) against one or more reference genomes selected based
+    on their Mash distance from the input.
+    */
+    tag "${sample} - ${reference_name}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/variants/auto", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${reference_name}/*"
+
+    input:
+    set val(sample), val(single_end), file(fq), file(reference) from create_reference_channel(CALL_VARIANTS_AUTO)
+
+    output:
+    file "${reference_name}/*"
+    file "${task.process}/*" optional true
+
+    shell:
+    snippy_ram = task.memory.toString().split(' ')[0]
+    reference_name = reference.getBaseName().split("${sample}-")[1].split(/\./)[0]
+    fastq = single_end ? "--se ${fq[0]}" : "--R1 ${fq[0]} --R2 ${fq[1]}"
+    bwaopt = params.bwaopt ? "--bwaopt 'params.bwaopt'" : ""
+    fbopt = params.fbopt ? "--fbopt 'params.fbopt'" : ""
+    template(task.ext.template)
+}
+
+
+process antimicrobial_resistance {
+    /*
+    Query nucleotides and proteins (SNPs/InDels) against one or more reference genomes selected based
+    on their Mash distance from the input.
+    */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "logs/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${amrdir}/*"
+
+    input:
+    set val(sample), file(genes), file(proteins) from ANTIMICROBIAL_RESISTANCE
+    each file(amrdb) from AMR_DATABASES
+
+    output:
+    file "${amrdir}/*"
+    file "logs/*" optional true
+
+    shell:
+    amrdir = "antimicrobial-resistance"
+    plus = params.amr_plus ? "--plus" : ""
+    report_common = params.amr_report_common ? "--report_common" : ""
+    organism_gene = ""
+    organism_protein = ""
+    if (params.amr_organism) {
+        organism_gene = "-O ${params.amr_organism} --point_mut_all ${amrdir}/${sample}-gene-point-mutations.txt"
+        organism_protein = "-O ${params.amr_organism} --point_mut_all ${amrdir}/${sample}-protein-point-mutations.txt"
+    }
+    template(task.ext.template)
+}
+
+process blast_primers {
+    /*
+    Query primer FASTA files against annotated assembly using BLAST
+    */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/blast", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "primers/*.{json,json.gz}"
+
+    input:
+    set val(sample), file(blastdb) from BLAST_PRIMERS
+    file(query) from Channel.from(BLAST_PRIMER_FASTAS).collect()
+
+    output:
+    file("primers/*.{json,json.gz}")
+    file "${task.process}/*" optional true
+
+    when:
+    BLAST_PRIMER_FASTAS.isEmpty() == false
+
+    shell:
+    template(task.ext.template)
+}
+
+process blast_proteins {
+    /*
+    Query protein FASTA files against annotated assembly using BLAST
+    */
+    tag "${sample}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}/blast", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "proteins/*.{json,json.gz}"
+
+    input:
+    set val(sample), file(blastdb) from BLAST_PROTEINS
+    file(query) from Channel.from(BLAST_PROTEIN_FASTAS).collect()
+
+    output:
+    file("proteins/*.{json,json.gz}")
+    file "${task.process}/*" optional true
+
+    when:
+    BLAST_PROTEIN_FASTAS.isEmpty() == false
+
+    shell:
+    template(task.ext.template)
+}
+
+
+process mapping_query {
+    /*
+    Map FASTQ reads against a given set of FASTA files using BWA.
+    */
+    tag "${sample}}"
+
+    publishDir "${outdir}/${sample}/logs", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${task.process}/*"
+    publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "mapping/*"
+
+    input:
+    set val(sample), val(single_end), file(fq) from MAPPING_QUERY
+    file(query) from Channel.from(MAPPING_FASTAS).collect()
+
+    output:
+    file "mapping/*"
+    file "${task.process}/*" optional true
+
+    when:
+    MAPPING_FASTAS.isEmpty() == false
+
+    shell:
+    bwa_mem_opts = params.bwa_mem_opts ? params.bwa_mem_opts : ""
+    bwa_aln_opts = params.bwa_aln_opts ? params.bwa_aln_opts : ""
+    bwa_samse_opts = params.bwa_samse_opts ? params.bwa_samse_opts : ""
+    bwa_sampe_opts = params.bwa_sampe_opts ? params.bwa_sampe_opts : ""
+    template(task.ext.template)
 }
 
 
@@ -281,7 +876,7 @@ def get_max_cpus(requested) {
         log.warn "Maximum CPUs (${requested}) was adjusted to fit your system (${available})"
         return available
     }
-    
+
     return requested
 }
 
@@ -300,14 +895,19 @@ def setup_datasets() {
         available_datasets = read_json("${dataset_path}/summary.json")
 
         // Antimicrobial Resistance Datasets
-        if (available_datasets.containsKey('antimicrobial-resistance')) {
-            available_datasets['antimicrobial-resistance'].each {
-                if (dataset_exists("${dataset_path}/antimicrobial-resistance/${it.name}")) {
-                    AMR_DATABASES << file("${dataset_path}/antimicrobial-resistance/${it.name}")
+        if (params.skip_amr) {
+            log.info "Found '--skip_amr', datasets for AMRFinder+ will not be used for analysis."
+        } else {
+            if (available_datasets.containsKey('antimicrobial-resistance')) {
+                available_datasets['antimicrobial-resistance'].each {
+                    if (dataset_exists("${dataset_path}/antimicrobial-resistance/${it.name}")) {
+                        AMR_DATABASES << file("${dataset_path}/antimicrobial-resistance/${it.name}")
+                    }
                 }
+                print_dataset_info(AMR_DATABASES, "Antimicrobial resistance datasets")
             }
-            print_dataset_info(AMR_DATABASES, "Antimicrobial resistance datasets")
         }
+
 
         // Ariba Datasets
         if (available_datasets.containsKey('ariba')) {
@@ -337,19 +937,6 @@ def setup_datasets() {
                     MINMER_DATABASES << file("${dataset_path}/plasmid/${available_datasets['plasmid']['sketches']}")
                 }
             }
-
-            if (available_datasets['plasmid'].containsKey('blastdb')) {
-                all_exist = true
-                file("${dataset_path}/plasmid/${available_datasets['plasmid']['blastdb']}*").each {
-                    if (!dataset_exists(it)) {
-                        all_exist = false
-                    }
-                }
-                if (all_exist) {
-                    PLASMID_BLASTDB = tuple(file("${dataset_path}/plasmid/${available_datasets['plasmid']['blastdb']}*"))
-                    print_dataset_info(PLASMID_BLASTDB, "PLSDB (plasmid) BLAST files")
-                }
-            }
         }
         print_dataset_info(MINMER_DATABASES, "minmer sketches/signatures")
 
@@ -359,8 +946,8 @@ def setup_datasets() {
                     species_db = available_datasets['species-specific'][SPECIES]
                     if (species_db.containsKey('genome_size')) {
                         genome_size = species_db['genome_size']
-                    } 
-                    
+                    }
+
                     if (params.genome_size) {
                         if (['min', 'median', 'mean', 'max'].contains(params.genome_size)) {
                             SPECIES_GENOME_SIZE = genome_size[params.genome_size]
@@ -432,7 +1019,7 @@ def setup_datasets() {
                             }
                             print_dataset_info(REFERENCES, "reference genomes")
                         }
-                        
+
                         if (species_db['optional'].containsKey('mapping-sequences')) {
                             file("${dataset_path}/${species_db['optional']['mapping-sequences']}").list().each() {
                                 if (dataset_exists("${dataset_path}/${species_db['optional']['mapping-sequences']}/${it}")) {
@@ -491,7 +1078,6 @@ def setup_datasets() {
         log.info "\tsequence_type"
         log.info "\tariba_analysis"
         log.info "\tminmer_query"
-        log.info "\tplasmid_blast"
         log.info "\tcall_variants"
         log.info "\tprimer_query"
     }
@@ -537,6 +1123,11 @@ def file_exists(file_name, parameter) {
     if (!file(file_name).exists()) {
         log.error('Invalid input ('+ parameter +'), please verify "' + file_name + '" exists.')
         return 1
+    } else if (['--R1', '--R2', '--SE', '--assembly'].contains(parameter)) {
+        if (!isGzipped(file_name)) {
+            log.error('Invalid input ('+ parameter +'), please verify "' + file_name + '" is GZIP compressed.')
+            return 1
+        }
     }
     return 0
 }
@@ -620,10 +1211,10 @@ def check_input_params() {
 
             ### For Downloading from SRA/ENA or NCBI Assembly
             **Note: Assemblies will have error free Illumina reads simulated for processing.**
-            --accessions            An input file containing ENA/SRA Experiment accessions or 
+            --accessions            An input file containing ENA/SRA Experiment accessions or
                                         NCBI Assembly accessions to be processed
 
-            --accession             A single ENA/SRA Experiment accession or NCBI Assembly accession 
+            --accession             A single ENA/SRA Experiment accession or NCBI Assembly accession
                                         to be processed
 
             ### For Processing an Assembly
@@ -647,13 +1238,19 @@ def check_input_params() {
 
     if (params.max_downloads >= 10) {
         log.warn "Please be aware the value you have set for --max_downloads (${params.max_downloads}) may cause NCBI " +
-                 "to temporarily block your IP address due to too many queries at once." 
+                 "to temporarily block your IP address due to too many queries at once."
     }
 
     if (params.genome_size) {
         if (!['min', 'median', 'mean', 'max'].contains(params.genome_size)) {
             error += is_positive_integer(params.genome_size, 'genome_size')
         }
+    }
+
+    if (!['megahit', 'velvet', 'skesa', 'spades', 'unicycler'].contains(params.assembler)) {
+        log.error "Invalid assembler (--assembler ${params.assembler}), must be 'megahit', " +
+                  "'skesa', 'velvet', 'spades', or 'unicycler'. Please correct to continue."
+        error += 1
     }
 
     if (!['dockerhub', 'github', 'quay'].contains(params.registry)) {
@@ -702,7 +1299,7 @@ def check_input_params() {
 def handle_multiple_fqs(read_set) {
     def fqs = []
     def String[] reads = read_set.split(",");
-    reads.each { fq -> 
+    reads.each { fq ->
         fqs << file(fq)
     }
     return fqs
@@ -769,6 +1366,7 @@ def create_input_channel(run_type) {
     }
 }
 
+
 def create_reference_channel(channel_input) {
     return channel_input.map { it ->
         def split_references = []
@@ -786,8 +1384,26 @@ def create_reference_channel(channel_input) {
      }.flatMap { it -> L:{ it.collect { it } } }
 }
 
+
+def isGzipped(f) {
+    /* https://github.com/ConnectedPlacesCatapult/TomboloDigitalConnector/blob/master/src/main/java/uk/org/tombolo/importer/ZipUtils.java */
+    int magic = 0;
+    try {
+        RandomAccessFile raf = new RandomAccessFile(f, "r");
+        magic = raf.read() & 0xff | ((raf.read() << 8) & 0xff00);
+        raf.close();
+    } catch (Throwable e) {
+        log.error("Failed to check if gzipped " + e.getMessage());
+        return false;
+    }
+
+    return magic == GZIPInputStream.GZIP_MAGIC;
+}
+
+
 def check_input_fastqs(run_type) {
     /* Read through --fastqs and verify each input exists. */
+
     if (run_type == "fastqs") {
         samples = [:]
         error = false
@@ -813,7 +1429,7 @@ def check_input_fastqs(run_type) {
                         }
                         count = count + 1
                     }
-                    if (count > 1) { 
+                    if (count > 1) {
                         USING_MERGE = true
                     }
                 }
@@ -903,7 +1519,7 @@ def print_efficiency() {
         tasks = total_cpus / MAX_CPUS
         log.info ""
         log.info """
-            Each task will use ${MAX_CPUS} CPUs out of the available ${total_cpus} CPUs. At most ${tasks} task(s) will be run at 
+            Each task will use ${MAX_CPUS} CPUs out of the available ${total_cpus} CPUs. At most ${tasks} task(s) will be run at
             a time, this can affect the efficiency of Bactopia.
         """.stripIndent()
         log.info ""
@@ -955,15 +1571,15 @@ def basic_help() {
 
         ### For Downloading from SRA/ENA or NCBI Assembly
         **Note: Assemblies will have error free Illumina reads simulated for processing.**
-        --accessions            An input file containing ENA/SRA Experiment accessions or 
+        --accessions            An input file containing ENA/SRA Experiment accessions or
                                     NCBI Assembly accessions to be processed
 
-        --accession             A single ENA/SRA Experiment accession or NCBI Assembly accession 
+        --accession             A single ENA/SRA Experiment accession or NCBI Assembly accession
                                     to be processed
 
         ### For Processing an Assembly
         **Note: The assembly will have error free Illumina reads simulated for processing.**
-        --assembly STR          A assembled genome in compressed FASTA format.
+        --assembly STR          A assembled genome in compressed (gzip) FASTA format.
 
         --reassemble            The simulated reads will be used to create a new assembly.
                                     Default: Use the original assembly, do not reassemble
@@ -992,12 +1608,12 @@ def basic_help() {
                                     Default: ${params.outdir}
 
     Nextflow Queue Parameters:
-        At execution, Nextflow creates a queue and the number of slots in the queue is determined by the total number 
-        of cores on the system. When a task is submitted to the queue, the total number of slots it occupies is 
-        determined by the value set by "--cpus". 
+        At execution, Nextflow creates a queue and the number of slots in the queue is determined by the total number
+        of cores on the system. When a task is submitted to the queue, the total number of slots it occupies is
+        determined by the value set by "--cpus".
 
-        This can have a significant effect on the efficiency of the Nextflow's queue system. If "--cpus" is set to a 
-        value that is equal to the number of cores availabe, in most cases only a single task will be able to run 
+        This can have a significant effect on the efficiency of the Nextflow's queue system. If "--cpus" is set to a
+        value that is equal to the number of cores availabe, in most cases only a single task will be able to run
         because its occupying all available slots.
 
         When in doubt, "--cpus 4" is a safe bet, it is also the default value if you don't use "--cpus".
@@ -1014,10 +1630,10 @@ def basic_help() {
         --max_memory INT        The maximum amount of memory (Gb) allowed to a single task.
                                     Default: ${params.max_memory} Gb
 
-        --cpus INT              Number of processors made available to a single task. 
+        --cpus INT              Number of processors made available to a single task.
                                     Default: ${params.cpus}
 
-        -qs INT                 Nextflow queue size. This parameter is very useful to limit the total number of 
+        -qs INT                 Nextflow queue size. This parameter is very useful to limit the total number of
                                     processors used on desktops, laptops or shared resources.
                                     Default: Nextflow defaults to the total number of processors on your system.
 
@@ -1044,9 +1660,9 @@ def basic_help() {
         --disable_scratch       All intermediate files created on worker nodes of will be transferred to the head node.
                                     Default: Only result files are transferred back
 
-        --nfconfig STR          A Nextflow compatible config file for custom profiles. This allows 
+        --nfconfig STR          A Nextflow compatible config file for custom profiles. This allows
                                     you to create profiles specific to your environment (e.g. SGE,
-                                    AWS, SLURM, etc...). This config file is loaded last and will 
+                                    AWS, SLURM, etc...). This config file is loaded last and will
                                     overwrite existing variables if set.
                                     Default: Bactopia's default configs
 
@@ -1062,16 +1678,16 @@ def basic_help() {
         --publish_mode          Set Nextflow's method for publishing output files. Allowed methods are:
                                     'copy' (default)    Copies the output files into the published directory.
 
-                                    'copyNoFollow' Copies the output files into the published directory 
+                                    'copyNoFollow' Copies the output files into the published directory
                                                    without following symlinks ie. copies the links themselves.
 
-                                    'link'    Creates a hard link in the published directory for each 
+                                    'link'    Creates a hard link in the published directory for each
                                               process output file.
 
                                     'rellink' Creates a relative symbolic link in the published directory
                                               for each process output file.
 
-                                    'symlink' Creates an absolute symbolic link in the published directory 
+                                    'symlink' Creates an absolute symbolic link in the published directory
                                               for each process output file.
 
                                     Default: ${params.publish_mode}
@@ -1079,7 +1695,7 @@ def basic_help() {
         --force                 Nextflow will overwrite existing output files.
                                     Default: ${params.force}
 
-        -resume                 Nextflow will attempt to resume a previous run. Please notice it is 
+        -resume                 Nextflow will attempt to resume a previous run. Please notice it is
                                     only a single '-'
 
         --cleanup_workdir       After Bactopia is successfully executed, the work directory will be deleted.
@@ -1151,7 +1767,7 @@ def full_help() {
                                     Default: ${params.aws_max_retry}
 
         --aws_ecr_registry STR  The ECR registry containing Bactopia related containers.
-                                    Default: Use the registry given by --registry 
+                                    Default: Use the registry given by --registry
 
     ENA Download Parameters:
         --max_downloads INT     Maximum number of FASTQs to download at once.
@@ -1170,20 +1786,24 @@ def full_help() {
                                     to continue downstream analyses.
                                     Default: ${params.min_basepairs}
 
+        --min_coverage INT      The minimum coverage of input sequences required
+                                    to continue downstream analyses.
+                                    Default: ${params.min_coverage}
+
         --min_reads INT         The minimum amount of input sequenced reads required
                                     to continue downstream analyses.
                                     Default: ${params.min_reads}
 
-        --min_proportion FLOAT  The minimum proportion of basepairs for paired-end reads to continue 
-                                    downstream analyses. Example: If set to 0.75 the R1 and R2 must 
-                                    have > 75% proportion of reads (e.g. R1 100bp, R2 75bp, not 
+        --min_proportion FLOAT  The minimum proportion of basepairs for paired-end reads to continue
+                                    downstream analyses. Example: If set to 0.75 the R1 and R2 must
+                                    have > 75% proportion of reads (e.g. R1 100bp, R2 75bp, not
                                     R1 100bp, R2 50bp)
                                     Default: ${params.min_proportion}
 
         --skip_fastq_check      The input FASTQs will not be check to verify they meet the
-                                    minimum requirements to be processed. This parameter 
-                                    is useful if you are confident your sequences will 
-                                    pass the minimum requirements.                
+                                    minimum requirements to be processed. This parameter
+                                    is useful if you are confident your sequences will
+                                    pass the minimum requirements.
 
     Estimate Genome Size Parameters:
         Only applied if the genome size is estimated.
@@ -1300,7 +1920,7 @@ def full_help() {
         --shovill_ram INT       Try to keep RAM usage below this many GB
                                     Default: ${params.shovill_ram} GB
 
-        --assembler STR         Assembler: megahit velvet skesa spades
+        --assembler STR         Assembler: megahit velvet skesa spades unicycler
                                     Default: ${params.assembler}
 
         --min_contig_len INT    Minimum contig length <0=AUTO>
@@ -1310,7 +1930,7 @@ def full_help() {
                                     Default: ${params.min_contig_cov}
 
         --contig_namefmt STR    Format of contig FASTA IDs in 'printf' style
-                                    Default: ${params.contig_namefmt}
+                                    Default: "SAMPLE_NAME_%05d"
 
         --shovill_opts STR      Extra assembler options in quotes eg.
                                     spades: "--untrusted-contigs locus.fna" ...
@@ -1330,54 +1950,54 @@ def full_help() {
                                     Default: ${params.unicycler_ram} GB
 
         --unicycler_mode STR    Bridging mode used by Unicycler, choices are:
-                                    conservative = smaller contigs, lowest 
+                                    conservative = smaller contigs, lowest
                                                    misassembly rate
-                                    normal = moderate contig size and 
+                                    normal = moderate contig size and
                                              misassembly rate (Default)
-                                    bold = longest contigs, higher misassembly 
+                                    bold = longest contigs, higher misassembly
                                            rate
 
-        --min_polish_size INT   Contigs shorter than this value (bp) will not be 
+        --min_polish_size INT   Contigs shorter than this value (bp) will not be
                                     polished using Pilon
                                     Default: ${params.min_polish_size}
 
         --min_component_size INT
-                                Graph components smaller than this size (bp) will 
+                                Graph components smaller than this size (bp) will
                                     be removed from the final graph
                                     Default: ${params.min_component_size}
 
-        --min_dead_end_size INT 
-                                Graph dead ends smaller than this size (bp) will 
+        --min_dead_end_size INT
+                                Graph dead ends smaller than this size (bp) will
                                     be removed from the final graph
                                     Default: ${params.min_dead_end_size}
 
-        --no_miniasm            Skip miniasm+Racon bridging 
+        --no_miniasm            Skip miniasm+Racon bridging
                                     Default: Produce long-read bridges
 
-        --no_rotate             Do not rotate completed replicons to start at a 
+        --no_rotate             Do not rotate completed replicons to start at a
                                     standard gene
 
-        --no_pilon              Do not use Pilon to polish the final assembly 
+        --no_pilon              Do not use Pilon to polish the final assembly
 
     Assembly Quality Control Parameters:
-        --skip_checkm           CheckM analysis will be skipped. This is useful for systems 
+        --skip_checkm           CheckM analysis will be skipped. This is useful for systems
                                     with less than 8GB of memory.
 
-        --checkm_unique INT     Minimum number of unique phylogenetic markers required 
+        --checkm_unique INT     Minimum number of unique phylogenetic markers required
                                     to use lineage-specific marker set.
                                     Default: ${params.checkm_unique}
-        
+
         --checkm_multi INT      Maximum number of multi-copy phylogenetic markers before
                                     defaulting to domain-level marker set.
                                     Default: ${params.checkm_multi}
-        
+
         --aai_strain FLOAT      AAI threshold used to identify strain heterogeneity
                                     Default: ${params.aai_strain}
-        
+
         --checkm_length FLOAT   Percent overlap between target and query
                                     Default: ${params.checkm_length}
 
-        --full_tree             Use the full tree (requires ~40GB of memory) for determining 
+        --full_tree             Use the full tree (requires ~40GB of memory) for determining
                                     lineage of each bin.
                                     Default: Use reduced tree (<16gb memory)
 
@@ -1394,17 +2014,17 @@ def full_help() {
 
         --no_refinement         Do not perform lineage-specific marker set refinement
 
-        --individual_markers    Treat marker as independent (i.e., ignore co-located 
+        --individual_markers    Treat marker as independent (i.e., ignore co-located
                                     set structure.
 
-        --skip_adj_correction   Do not exclude adjacent marker genes when estimating 
+        --skip_adj_correction   Do not exclude adjacent marker genes when estimating
                                     contamination
 
         --contig_thresholds STR Comma-separated list of contig length thresholds
                                     Default: ${params.contig_thresholds}
 
         --plots_format STR      Save plots in specified format.
-                                    Supported formats: emf, eps, pdf, png, ps, raw, 
+                                    Supported formats: emf, eps, pdf, png, ps, raw,
                                                         rgba, svg, svgz
                                     Default: ${params.plots_format}
 
@@ -1435,7 +2055,7 @@ def full_help() {
                                      Default: ${params.prokka_coverage}
 
         --nogenes               Do not add 'gene' features for each 'CDS' feature
-        
+
         --norrna                Don't run rRNA search
 
         --notrna                Don't run tRNA search
@@ -1593,7 +2213,9 @@ def full_help() {
                                     Default: ${params.bwa_n}
 
     Antimicrobial Resistance Parameters:
-        --update_amr            Force amrfinder to update its database.
+        --skip_amr              AMRFinder+ analysis will be skipped. This is useful
+                                    if the AMRFinder+ software and database versions are
+                                    no longer compatible.
 
         --amr_ident_min         Minimum identity for nucleotide hit (0..1). -1
                                     means use a curated threshold if it exists and
@@ -1613,6 +2235,6 @@ def full_help() {
         --amr_plus              Add the plus genes to the report
 
         --amr_report_common     Suppress proteins common to a taxonomy group
-        
+
     """
 }
