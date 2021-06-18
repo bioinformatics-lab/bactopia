@@ -8,14 +8,14 @@ process ESTIMATE_GENOME_SIZE {
     publishDir "${params.outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: '*.txt'
 
     input:
-    tuple val(sample), val(sample_type), val(single_end), file(fq), file(extra)
+    tuple val(sample), val(sample_type), val(single_end), path(fq), path(extra)
 
     output:
-    file "${sample}-genome-size-error.txt" optional true
-    file("${sample}-genome-size.txt") optional true
+    path "${sample}-genome-size-error.txt" optional true
+    path("${sample}-genome-size.txt") optional true
     tuple val(sample), val(sample_type), val(single_end), 
-        file("fastqs/${sample}*.fastq.gz"), file(extra), file("${sample}-genome-size.txt"),emit: QUALITY_CONTROL, optional: true
-    file "${task.process}/*" optional true
+        path("fastqs/${sample}*.fastq.gz"), path(extra), path("${sample}-genome-size.txt"),emit: QUALITY_CONTROL, optional: true
+    path "${task.process}/*" optional true
 
     shell:
     genome_size = SPECIES_GENOME_SIZE
@@ -42,8 +42,8 @@ workflow test {
         params.sample, 
         params.sample_type, 
         params.single_end,
-        file(params.fq),
-        file(params.extra)             
+        path(params.fq),
+        path(params.extra)             
         ])
 
     estimate_genome_size(TEST_PARAMS_CH)

@@ -8,7 +8,7 @@ process QC_ORIGINAL_SUMMARY {
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "quality-control/*"
 
     input:
-    tuple val(sample), val(sample_type), val(single_end), file(fq), file(extra), file(genome_size)
+    tuple val(sample), val(sample_type), val(single_end), path(fq), path(extra), path(genome_size)
 
     output:
     file "quality-control/*"
@@ -38,9 +38,9 @@ workflow test{
         params.sample,
         params.sample_type,
         params.single_end,
-        file(params.fq),
-        file(params.extra),
-        file(params.genome_size)
+        path(params.fq),
+        path(params.extra),
+        path(params.genome_size)
         ])
 
     qc_original_summary(TEST_PARAMS_CH)

@@ -10,11 +10,11 @@ process BLAST_PROTEINS {
     publishDir "${outdir}/${sample}/blast", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "proteins/*.{json,json.gz}"
 
     input:
-    tuple val(sample), file(blastdb)
-    file(query)
+    tuple val(sample), path(blastdb)
+    path(query)
 
     output:
-    file("proteins/*.{json,json.gz}")
+    path("proteins/*.{json,json.gz}")
     file "${task.process}/*" optional true
 
     when:
@@ -41,10 +41,10 @@ process BLAST_PROTEINS {
 workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample,
-        file(params.blastdb),
+        path(params.blastdb),
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        file(params.query)
+        path(params.query)
         )
 
     blast_proteins(TEST_PARAMS_CH,TEST_PARAMS_CH2)

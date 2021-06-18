@@ -8,8 +8,8 @@ process SEQUENCE_TYPE {
     publishDir "${outdir}/${sample}/mlst/${schema}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${method}/*"
 
     input:
-    tuple val(sample), val(single_end), file(fq), file(assembly)
-    each file(dataset)
+    tuple val(sample), val(single_end), path(fq), path(assembly)
+    each path(dataset)
 
     output:
     file "${method}/*"
@@ -20,7 +20,7 @@ process SEQUENCE_TYPE {
 
     shell:
     method = dataset =~ /.*blastdb.*/ ? 'blast' : 'ariba'
-    dataset_tarball = file(dataset).getName()
+    dataset_tarball = path(dataset).getName()
     dataset_name = dataset_tarball.replace('.tar.gz', '').split('-')[1]
     schema = dataset_tarball.split('-')[0]
     noclean = params.ariba_no_clean ? "--noclean" : ""
@@ -30,7 +30,7 @@ process SEQUENCE_TYPE {
 
     stub:
     method = dataset =~ /.*blastdb.*/ ? 'blast' : 'ariba'
-    dataset_tarball = file(dataset).getName()
+    dataset_tarball = path(dataset).getName()
     schema = dataset_tarball.split('-')[0]
     """
     mkdir ${method}
@@ -49,12 +49,12 @@ workflow test{
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq),
-        file(params.assembly)
+        path(params.fq),
+        path(params.assembly)
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        file(params.dataset_blast)
-        file(params.dataset_ariba))
+        path(params.dataset_blast)
+        path(params.dataset_ariba))
 
     sequence_type(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }

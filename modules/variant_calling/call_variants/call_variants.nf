@@ -11,12 +11,12 @@ process CALL_VARIANTS {
     publishDir "${outdir}/${sample}/variants/user", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${reference_name}/*"
 
     input:
-    tuple val(sample), val(single_end), file(fq)
-    each file(reference)
+    tuple val(sample), val(single_end), path(fq)
+    each path(reference)
 
     output:
-    file "${reference_name}/*"
-    file "${task.process}/*" optional true
+    path "${reference_name}/*"
+    path "${task.process}/*" optional true
 
     when:
     REFERENCES.isEmpty() == false
@@ -47,10 +47,10 @@ workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq),
+        path(params.fq),
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        file(params.reference)
+        path(params.reference)
         )
     call_variants(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect)
 }

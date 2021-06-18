@@ -9,15 +9,15 @@ process GATHER_FASTQS {
     tag "${sample}"
 
     input:
-    tuple val(sample), val(sample_type), val(single_end), file(r1: '*???-r1'), file(r2: '*???-r2'), file(extra)
+    tuple val(sample), val(sample_type), val(single_end), path(r1: '*???-r1'), path(r2: '*???-r2'), path(extra)
 
     output:
-    file("*-error.txt") optional true
+    path("*-error.txt") optional true
     tuple val(sample), val(final_sample_type), val(single_end),
-        file("fastqs/${sample}*.fastq.gz"), file("extra/*.gz"), emit: FASTQ_PE_STATUS, optional: true
-    file("${task.process}/*") optional true
-    file("bactopia.versions") optional true
-    file("multiple-read-sets-merged.txt") optional true
+        path("fastqs/${sample}*.fastq.gz"), path("extra/*.gz"), emit: FASTQ_PE_STATUS, optional: true
+    path("${task.process}/*") optional true
+    path("bactopia.versions") optional true
+    path("multiple-read-sets-merged.txt") optional true
 
     shell:
     bactopia_version = VERSION

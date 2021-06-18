@@ -8,11 +8,11 @@ process MAKE_BLASTDB {
     publishDir "${outdir}/${sample}/blast", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "blastdb/*"
 
     input:
-    tuple val(sample), val(single_end), file(fasta)
+    tuple val(sample), val(single_end), path(fasta)
 
     output:
-    file("blastdb/*")
-    tuple val(sample), file("blastdb/*"), emit: BLAST_DB, optional:true
+    path("blastdb/*")
+    tuple val(sample), path("blastdb/*"), emit: BLAST_DB, optional:true
     file "${task.process}/*" optional true
 
     shell:
@@ -36,7 +36,7 @@ workflow test{
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fasta)
+        path(params.fasta)
     ])
 
     make_blastdb(TEST_PARAMS_CH)

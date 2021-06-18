@@ -8,10 +8,10 @@ process COUNT_31MERS {
     publishDir "${outdir}/${sample}/kmers", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*.ctx"
 
     input:
-    tuple val(sample), val(single_end), file(fq)
+    tuple val(sample), val(single_end), path(fq)
     output:
-    file "${sample}.ctx"
-    file "${task.process}/*" optional true
+    path "${sample}.ctx"
+    path "${task.process}/*" optional true
 
     shell:
     m = task.memory.toString().split(' ')[0].toInteger() * 1000 - 500
@@ -34,7 +34,7 @@ workflow test{
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq)
+        path(params.fq)
         ])
 
     count_31mers(TEST_PARAMS_CH)

@@ -11,11 +11,11 @@ process CALL_VARIANTS_AUTO {
     publishDir "${outdir}/${sample}/variants/auto", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${reference_name}/*"
 
     input:
-    tuple val(sample), val(single_end), file(fq), file(reference)
+    tuple val(sample), val(single_end), path(fq), path(reference)
 
     output:
-    file "${reference_name}/*"
-    file "${task.process}/*" optional true
+    path "${reference_name}/*"
+    path "${task.process}/*" optional true
 
     shell:
     snippy_ram = task.memory.toString().split(' ')[0]
@@ -45,8 +45,8 @@ workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq),
-        file(params.reference)
+        path(params.fq),
+        path(params.reference)
         ])
     call_variants_auto(TEST_PARAMS_CH)
 }

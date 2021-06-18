@@ -10,8 +10,8 @@ process MAPPING_QUERY {
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "mapping/*"
 
     input:
-    tuple val(sample), val(single_end), file(fq)
-    each file(query)
+    tuple val(sample), val(single_end), path(fq)
+    each path(query)
 
     output:
     file "mapping/*"
@@ -44,10 +44,10 @@ workflow test{
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq)
+        path(params.fq)
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        file(params.query)
+        path(params.query)
         )
     mapping_query(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }

@@ -11,12 +11,12 @@ process MINMER_QUERY {
     publishDir "${outdir}/${sample}/minmers", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*.txt"
 
     input:
-    tuple val(sample), val(single_end), file(fq), file(sourmash)
-    each file(dataset)
+    tuple val(sample), val(single_end), path(fq), path(sourmash)
+    each path(dataset)
 
     output:
-    file "*.txt"
-    file "${task.process}/*" optional true
+    path "*.txt"
+    path "${task.process}/*" optional true
 
     when:
     MINMER_DATABASES.isEmpty() == false
@@ -44,9 +44,9 @@ workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq),
-        file(params.sourmash)
+        path(params.fq),
+        path(params.sourmash)
     ])
-    TEST_PARAMS_CH2 = Channel.of(file(params.k21),file(params.k31),file(params.k51),file(params.refseqk21))
+    TEST_PARAMS_CH2 = Channel.of(path(params.k21),path(params.k31),path(params.k51),path(params.refseqk21))
     minmer_query(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }

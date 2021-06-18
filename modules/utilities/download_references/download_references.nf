@@ -14,12 +14,12 @@ process DOWNLOAD_REFERENCES {
     publishDir "${outdir}/${sample}/variants/auto", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: 'mash-dist.txt'
 
     input:
-    tuple val(sample), val(single_end), file(fq), file(sample_sketch)
-    file(refseq_sketch)
+    tuple val(sample), val(single_end), path(fq), path(sample_sketch)
+    path(refseq_sketch)
 
     output:
-    tuple val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("genbank/*.gbk"), emit:CALL_VARIANTS_AUTO, optional: true
-    file("mash-dist.txt")
+    tuple val(sample), val(single_end), path("fastqs/${sample}*.fastq.gz"), path("genbank/*.gbk"), emit:CALL_VARIANTS_AUTO, optional: true
+    path("mash-dist.txt")
     file "${task.process}/*" optional true
 
     when:
@@ -51,11 +51,11 @@ workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq),
-        file(params.sample_sketch)
+        path(params.fq),
+        path(params.sample_sketch)
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        file(params.refseq_sketch)
+        path(params.refseq_sketch)
         )
     download_references(TEST_PARAMS_CH,TEST_PARAMS_CH2)
 }

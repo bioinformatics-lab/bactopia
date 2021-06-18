@@ -9,16 +9,16 @@ process ASSEMBLE_GENOME {
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${sample}-assembly-error.txt"
 
     input:
-    tuple val(sample), val(sample_type), val(single_end), file(fq), file(extra), file(genome_size)
+    tuple val(sample), val(sample_type), val(single_end), path(fq), path(extra), path(genome_size)
 
     output:
-    file "assembly/*"
-    file "${sample}-assembly-error.txt" optional true
-    tuple val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("assembly/${sample}.{fna,fna.gz}"),emit: SEQUENCE_TYPE, optional:true
-    tuple val(sample), val(single_end), file("assembly/${sample}.{fna,fna.gz}"), emit: MAKE_BLASTDB, optional: true
-    tuple val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("assembly/${sample}.{fna,fna.gz}"), file("total_contigs_*"),emit: ANNOTATION, optional:true
-    tuple val(sample), file("assembly/${sample}.{fna,fna.gz}"), file(genome_size),emit: ASSEMBLY_QC, optional: true
-    file "${task.process}/*" optional true
+    path "assembly/*"
+    path "${sample}-assembly-error.txt" optional true
+    tuple val(sample), val(single_end), path("fastqs/${sample}*.fastq.gz"), path("assembly/${sample}.{fna,fna.gz}"),emit: SEQUENCE_TYPE, optional:true
+    tuple val(sample), val(single_end), path("assembly/${sample}.{fna,fna.gz}"), emit: MAKE_BLASTDB, optional: true
+    tuple val(sample), val(single_end), path("fastqs/${sample}*.fastq.gz"), path("assembly/${sample}.{fna,fna.gz}"), path("total_contigs_*"),emit: ANNOTATION, optional:true
+    tuple val(sample), path("assembly/${sample}.{fna,fna.gz}"), path(genome_size),emit: ASSEMBLY_QC, optional: true
+    path "${task.process}/*" optional true
 
     shell:
     shovill_ram = task.memory.toString().split(' ')[0]
@@ -61,9 +61,9 @@ workflow test{
         params.sample,
         params.sample_type,
         params.single_end,
-        file(params.fq),
-        file(params.extra),
-        file(params.genome_size)
+        path(params.fq),
+        path(params.extra),
+        path(params.genome_size)
         ])
 
     assemble_genome(TEST_PARAMS_CH)

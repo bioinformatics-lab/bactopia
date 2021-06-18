@@ -8,8 +8,8 @@ process ARIBA_ANALYSIS {
     publishDir "${outdir}/${sample}/ariba", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${dataset_name}/*"
 
     input:
-    tuple val(sample), val(single_end), file(fq)
-    each file(dataset)
+    tuple val(sample), val(single_end), path(fq)
+    each path(dataset)
 
     output:
     file "${dataset_name}/*"
@@ -19,14 +19,14 @@ process ARIBA_ANALYSIS {
     single_end == false && ARIBA_DATABASES.isEmpty() == false
 
     shell:
-    dataset_tarball = file(dataset).getName()
+    dataset_tarball = path(dataset).getName()
     dataset_name = dataset_tarball.replace('.tar.gz', '')
     spades_options = params.spades_options ? "--spades_options '${params.spades_options}'" : ""
     noclean = params.ariba_no_clean ? "--noclean" : ""
 
     template "ariba_analysis.sh"
     stub:
-    dataset_tarball = file(dataset).getName()
+    dataset_tarball = path(dataset).getName()
     dataset_name = dataset_tarball.replace('.tar.gz', '')
     """
     mkdir ${dataset_name}
@@ -44,8 +44,8 @@ workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq)
+        path(params.fq)
         ])
-    TEST_PARAMS_CH2 = Channel.of(file(params.card),file(params.vfdb))
+    TEST_PARAMS_CH2 = Channel.of(path(params.card),path(params.vfdb))
     ariba_analysis(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }

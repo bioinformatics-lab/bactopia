@@ -11,13 +11,13 @@ process MINMER_SKETCH {
     publishDir "${outdir}/${sample}/minmers", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*.{msh,sig}"
 
     input:
-    tuple val(sample), val(single_end), file(fq)
+    tuple val(sample), val(single_end), path(fq)
 
     output:
-    file("${sample}*.{msh,sig}")
-    tuple val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("${sample}.sig"),emit: MINMER_QUERY
-    tuple val(sample), val(single_end), file("fastqs/${sample}*.fastq.gz"), file("${sample}-k31.msh"),emit: DOWNLOAD_REFERENCES
-    file "${task.process}/*" optional true
+    path("${sample}*.{msh,sig}")
+    tuple val(sample), val(single_end), path("fastqs/${sample}*.fastq.gz"), path("${sample}.sig"),emit: MINMER_QUERY
+    tuple val(sample), val(single_end), path("fastqs/${sample}*.fastq.gz"), path("${sample}-k31.msh"),emit: DOWNLOAD_REFERENCES
+    path "${task.process}/*" optional true
 
     shell:
     fastq = single_end ? fq[0] : "${fq[0]} ${fq[1]}"
@@ -43,7 +43,7 @@ workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq)
+        path(params.fq)
         ])
 
     minmer_sketch(TEST_PARAMS_CH)

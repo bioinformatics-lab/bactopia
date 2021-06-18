@@ -10,12 +10,12 @@ process PLASMID_BLAST {
     publishDir "${outdir}/${sample}/blast", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*.{json,json.gz}"
 
     input:
-    tuple val(sample), file(genes)
-    file(blastdb_files)
+    tuple val(sample), path(genes)
+    path(blastdb_files)
 
     output:
-    file("${sample}-plsdb.{json,json.gz}")
-    file "${task.process}/*" optional true
+    path("${sample}-plsdb.{json,json.gz}")
+    path("${task.process}/*" optional true
 
     when:
     PLASMID_BLASTDB.isEmpty() == false
@@ -41,10 +41,10 @@ process PLASMID_BLAST {
 workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample, 
-        params.genes,          
+        path(params.genes),          
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        params.blastdb_files
+        path(params.blastdb_files)
         )
 
     plasmid_blast(TEST_PARAMS_CH,TEST_PARAMS_CH2)

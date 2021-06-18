@@ -11,12 +11,12 @@ process ANTIMICROBIAL_RESISTANCE {
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${amrdir}/*"
 
     input:
-    tuple val(sample), file(genes), file(proteins)
-    each file(amrdb)
+    tuple val(sample), path(genes), path(proteins)
+    each path(amrdb)
 
     output:
-    file "${amrdir}/*"
-    file "logs/*" optional true
+    path "${amrdir}/*"
+    path "logs/*" optional true
 
     shell:
     amrdir = "antimicrobial-resistance"
@@ -47,11 +47,11 @@ process ANTIMICROBIAL_RESISTANCE {
 workflow test {
     TEST_PARAMS_CH = Channel.of([
         params.sample,
-        file(params.genes),
-        file(params.proteins)
+        path(params.genes),
+        path(params.proteins)
         ])
     TEST_PARAMS_CH2 = Channel.of(
-        file(params.amrdb)
+        path(params.amrdb)
         )
     antimicrobial_resistance(TEST_PARAMS_CH,TEST_PARAMS_CH2.collect())
 }

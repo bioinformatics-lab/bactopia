@@ -10,28 +10,28 @@ process QC_READS {
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "*error.txt"
 
     input:
-    tuple val(sample), val(sample_type), val(single_end), file(fq), file(extra), file(genome_size)
+    tuple val(sample), val(sample_type), val(single_end), path(fq), path(extra), path(genome_size)
 
     output:
     file "*-error.txt" optional true
     file "quality-control/*"
     tuple val(sample), val(single_end),
-        file("quality-control/${sample}*.fastq.gz"),emit: READS,optional: true//,emit: COUNT_31MERS, ARIBA_ANALYSIS,MINMER_SKETCH, CALL_VARIANTS,MAPPING_QUERY optional true
+        path("quality-control/${sample}*.fastq.gz"),emit: READS,optional: true//,emit: COUNT_31MERS, ARIBA_ANALYSIS,MINMER_SKETCH, CALL_VARIANTS,MAPPING_QUERY optional true
     tuple val(sample), val(sample_type), val(single_end),
-        file("quality-control/${sample}*.fastq.gz"), file(extra),
-        file(genome_size),emit: ASSEMBLY, optional: true
+        path("quality-control/${sample}*.fastq.gz"), path(extra),
+        path(genome_size),emit: ASSEMBLY, optional: true
 
     tuple val(sample), val(single_end),
-        file("quality-control/${sample}*.{fastq,error-fq}.gz"),
-        file(genome_size),emit: QC_FINAL_SUMMARY, optional: true
+        path("quality-control/${sample}*.{fastq,error-fq}.gz"),
+        path(genome_size),emit: QC_FINAL_SUMMARY, optional: true
     file "${task.process}/*" optional true
 
     shell:
     qc_ram = task.memory.toString().split(' ')[0]
     is_assembly = sample_type.startsWith('assembly') ? true : false
     qin = sample_type.startsWith('assembly') ? 'qin=33' : 'qin=auto'
-    adapters = params.adapters ? file(params.adapters) : 'adapters'
-    phix = params.phix ? file(params.phix) : 'phix'
+    adapters = params.adapters ? path(params.adapters) : 'adapters'
+    phix = params.phix ? path(params.phix) : 'phix'
 
     template "qc_reads.sh"
 
@@ -57,9 +57,9 @@ workflow test{
         params.sample,
         params.sample_type,
         params.single_end,
-        file(params.fq),
-        file(params.extra),
-        file(params.genome_size)
+        path(params.fq),
+        path(params.extra),
+        path(params.genome_size)
     ])
     qc_reads(TEST_PARAMS_CH)
 }

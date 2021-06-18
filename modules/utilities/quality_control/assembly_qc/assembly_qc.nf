@@ -8,7 +8,7 @@ process ASSEMBLY_QC {
     publishDir "${outdir}/${sample}/assembly", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "${method}/*"
 
     input:
-    tuple val(sample), file(fasta), file(genome_size)
+    tuple val(sample), path(fasta), path(genome_size)
     each method
 
     output:
@@ -39,8 +39,8 @@ workflow test{
 
     TEST_PARAMS_CH = Channel.of([
         params.sample,
-        file(params.fasta),
-        file(params.genome_size)
+        path(params.fasta),
+        path(params.genome_size)
         ])
     TEST_PARAMS_CH2 = Channel.of('checkm', 'quast')
 

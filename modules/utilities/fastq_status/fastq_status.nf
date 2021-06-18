@@ -6,11 +6,11 @@ process FASTQ_STATUS {
     publishDir "${params.outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: '*.txt'
 
     input:
-    tuple val(sample), val(sample_type), val(single_end), file(fq), file(extra)
+    tuple val(sample), val(sample_type), val(single_end), path(fq), path(extra)
     output:
     file "*-error.txt" optional true
     tuple val(sample), val(sample_type), val(single_end), 
-        file("fastqs/${sample}*.fastq.gz"), file(extra),emit: ESTIMATE_GENOME_SIZE, optional: true
+        path("fastqs/${sample}*.fastq.gz"), path(extra),emit: ESTIMATE_GENOME_SIZE, optional: true
     file "${task.process}/*" optional true
 
     shell:
@@ -39,8 +39,8 @@ workflow test{
         params.sample, 
         params.sample_type, 
         params.single_end,
-        file(params.fq),
-        file(params.extra)             
+        path(params.fq),
+        path(params.extra)             
         ])
 
     fastq_status(TEST_PARAMS_CH)

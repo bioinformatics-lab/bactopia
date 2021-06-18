@@ -8,7 +8,7 @@ process QC_FINAL_SUMMARY {
     publishDir "${outdir}/${sample}", mode: "${params.publish_mode}", overwrite: params.overwrite, pattern: "quality-control/*"
 
     input:
-    tuple val(sample), val(single_end), file(fq), file(genome_size)
+    tuple val(sample), val(single_end), path(fq), path(genome_size)
 
     output:
     file "quality-control/*"
@@ -36,8 +36,8 @@ workflow test{
     TEST_PARAMS_CH = Channel.of([
         params.sample,
         params.single_end,
-        file(params.fq),
-        file(params.genome_size)
+        path(params.fq),
+        path(params.genome_size)
         ])
 
     qc_final_summary(TEST_PARAMS_CH)
