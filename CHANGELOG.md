@@ -1,5 +1,65 @@
 # Changelog
 
+## v1.7.1 bactopia/bactopia "Shellbuster" - 2021/06/04
+### `Added`
+- bumped GTDB to v1.5.0
+- added soft ulimit for `staph-typer`
+
+### `Fixed`
+- Matched PIRATE's parameter syntax for the tools
+- `staph-typer` now uses GetBaseName
+
+### 'Removed'
+- PLSDB references in `bactopia datasets`
+
+
+## v1.7.0 bactopia/bactopia "Chocobo Wand" - 2021/04/27
+### `Added`
+- Bactopia Tool `staph_typer` for agr, spa, and sccmec typing
+- `--min_coverage` parameter to filter based on min coverage
+
+### 'Removed'
+- `plasmid_blast` no longer apart of main workflow
+
+## v1.6.5 bactopia/bactopia "Z's Trident" - 2021/03/30
+### `Added`
+- version pins to process envs
+
+### `Fixed`
+- syntax for sourmash 4.0
+
+## v1.6.4 bactopia/bactopia "Trident +1" - 2021/03/26
+### `Added`
+- added Python3.6+ to all environments
+
+## v1.6.3 bactopia/bactopia "Trident" - 2021/03/25
+### `Added`
+- extra fields to `mlst-blast.py` outputs
+- added Python3 to `qc_reads` environment
+
+### `Fixed`
+- rstrip on empty extra fields in mlst profile
+- different BLAST+ software versions mismatch
+- tbb pinnings
+- `--help` and `--version` for `bactopia tools`
+
+## v1.6.2 bactopia/bactopia "Fuscina" - 2021/03/19
+### `Added`
+- inputs are checked to be gzipped (this does not include FOFN)
+- `--skip_amr` to skip AMRFinder+ analysis
+- new  `bactopia tool` for `hicap`
+- `unicycler` can be used for Illumina reads only (`--assembler unicycler`)
+
+### `Fixed`
+- AMRFinder+ software and database version mismatch
+- check-fastqs.py syntax errors with prints
+- `ismapper` tool processing of include/exclude files
+
+## v1.6.1 bactopia/bactopia "Obelisk" - 2021/02/22
+### `Fixed`
+- sample names with "." in them breaking auto variant calling
+- contig naming incompatible with GenBank
+
 ## v1.6.0 bactopia/bactopia "Harpoon" - 2021/01/22
 ### `Added`
 - `bactopia pull` to pre-build Singularity images

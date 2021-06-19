@@ -1,31 +1,35 @@
 name: bactopia-antimicrobial_resistance
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
   - _libgcc_mutex=0.1
   - _openmp_mutex=4.5
-  - blast=2.10.1
+  - blast=2.11.0
   - bzip2=1.0.8
   - c-ares=1.17.1
-  - ca-certificates=2020.12.5
-  - curl=7.71.1
+  - ca-certificates=2021.1.19
+  - certifi=2020.12.5
+  - coreutils=8.32
+  - curl=7.75.0
   - entrez-direct=13.9
-  - expat=2.2.9
-  - hmmer=3.3.1
+  - expat=2.3.0
+  - hmmer=3.3.2
   - krb5=1.17.2
-  - libcurl=7.71.1
-  - libedit=3.1.20191231
+  - ld_impl_linux-64=2.35.1
+  - libcurl=7.75.0
+  - libedit=3.1.20210216
   - libev=4.33
+  - libffi=3.3
   - libgcc-ng=9.3.0
   - libgomp=9.3.0
-  - libnghttp2=1.41.0
+  - libnghttp2=1.43.0
   - libssh2=1.9.0
   - libstdcxx-ng=9.3.0
-  - ncbi-amrfinderplus=3.9.8
+  - ncbi-amrfinderplus=3.10.1
   - ncurses=6.2
-  - openssl=1.1.1i
+  - openssl=1.1.1k
   - pcre=8.44
   - perl=5.26.2
   - perl-app-cpanminus=1.7044
@@ -91,7 +95,16 @@ dependencies:
   - perl-xml-sax-expat=0.51
   - perl-xml-simple=2.25
   - perl-xsloader=0.24
+  - pigz=2.6
+  - pip=21.0.1
+  - python=3.9.2
+  - python_abi=3.9
+  - readline=8.1
+  - sed=4.8
+  - setuptools=52.0.0
+  - sqlite=3.35.3
   - tk=8.6.10
+  - tzdata=2021a
+  - wheel=0.36.2
+  - xz=5.2.5
   - zlib=1.2.11
-prefix: /local/home/rpetit/miniconda3/envs/bactopia-antimicrobial_resistance
-

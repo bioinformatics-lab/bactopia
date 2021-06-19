@@ -2213,7 +2213,7 @@ def full_help() {
                                     Default: ${params.bwa_n}
 
     Antimicrobial Resistance Parameters:
-        --skip_amr              AMRFinder+ analysis will be skipped. This is useful
+        --skip_amr              AMRFinder+ analysis will be skipped. This is useful 
                                     if the AMRFinder+ software and database versions are
                                     no longer compatible.
 

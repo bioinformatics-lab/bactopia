@@ -4,31 +4,33 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - blast=2.10.1
+  - blast=2.11.0
   - bzip2=1.0.8
   - c-ares=1.17.1
-  - ca-certificates=2020.12.5
-  - coreutils=8.31
-  - curl=7.71.1
+  - ca-certificates=2021.1.19
+  - certifi=2020.12.5
+  - coreutils=8.32
+  - curl=7.75.0
   - entrez-direct=13.9
-  - expat=2.2.9
+  - expat=2.3.0
   - gettext=0.19.8.1
-  - hmmer=3.3.1
+  - hmmer=3.3.2
   - krb5=1.17.2
-  - libcurl=7.71.1
-  - libcxx=11.0.1
-  - libedit=3.1.20191231
+  - libcurl=7.75.0
+  - libcxx=11.1.0
+  - libedit=3.1.20210216
   - libev=4.33
   - libffi=3.3
   - libiconv=1.16
-  - libnghttp2=1.41.0
+  - libnghttp2=1.43.0
   - libssh2=1.9.0
-  - llvm-openmp=11.0.1
-  - ncbi-amrfinderplus=3.9.8
+  - llvm-openmp=11.1.0
+  - ncbi-amrfinderplus=3.10.1
   - ncurses=6.2
-  - openssl=1.1.1i
+  - openssl=1.1.1k
   - pcre=8.44
   - perl=5.26.2
+  - perl-app-cpanminus=1.7044
   - perl-archive-tar=2.32
   - perl-base=2.23
   - perl-business-isbn=3.004
@@ -47,6 +49,8 @@ dependencies:
   - perl-exporter-tiny=1.002001
   - perl-extutils-makemaker=7.36
   - perl-file-listing=6.04
+  - perl-file-path=2.16
+  - perl-file-temp=0.2304
   - perl-html-parser=3.72
   - perl-html-tagset=3.20
   - perl-html-tree=5.07
@@ -84,13 +88,21 @@ dependencies:
   - perl-www-robotrules=6.02
   - perl-xml-namespacesupport=1.12
   - perl-xml-parser=2.44_01
-  - perl-xml-sax=0.99
+  - perl-xml-sax=1.02
   - perl-xml-sax-base=1.09
   - perl-xml-sax-expat=0.51
   - perl-xml-simple=2.25
   - perl-xsloader=0.24
-  - sed=4.7
+  - pigz=2.6
+  - pip=21.0.1
+  - python=3.9.2
+  - python_abi=3.9
+  - readline=8.1
+  - sed=4.8
+  - setuptools=52.0.0
+  - sqlite=3.35.3
   - tk=8.6.10
+  - tzdata=2021a
+  - wheel=0.36.2
+  - xz=5.2.5
   - zlib=1.2.11
-prefix: /Users/rpetit/miniconda3/envs/bactopia-antimicrobial_resistance
-

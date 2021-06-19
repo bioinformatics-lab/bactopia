@@ -21,18 +21,20 @@ STDERR = 12
 logging.addLevelName(STDOUT, "STDOUT")
 logging.addLevelName(STDERR, "STDERR")
 
-VERSION = "1.6.0"
+VERSION = "1.7.1"
 PROGRAM = "bactopia tools"
 DESCRIPTION = 'A suite of comparative analyses for Bactopia outputs'
 AVAILABLE_TOOLS = {
     'eggnog': {'info': 'Functional annotation using orthologous groups', 'mac': True},
     'fastani': {'info': 'Pairwise average nucleotide identity', 'mac': True},
     'gtdb': {'info': 'Identify marker genes and assign taxonomic classifications', 'mac': False},
+    'hicap': {'info': 'in silico typing of the H. influenzae cap locus', 'mac': True},
     'ismapper': {'info': 'Identify positions of insertion sites', 'mac': True},
     'mashtree': {'info': 'Trees based on Mash distances', 'mac': True},
     'pirate': {'info': 'Pan-genome with optional core-genome tree', 'mac': True},
     'phyloflash': {'info': '16s assembly, alignment and tree', 'mac': True},
     'roary': {'info': 'Pan-genome with optional core-genome tree', 'mac': True},
+    'staph-typer': {'info': 'Tools for typing Staphylococcus aureus.', 'mac': True},
     'summary': {'info': 'A report summarizing Bactopia project', 'mac': True},
 }
 

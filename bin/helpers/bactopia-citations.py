@@ -12,9 +12,10 @@ optional arguments:
 import os
 import sys
 
-VERSION = "1.6.0"
+VERSION = "1.7.1"
 PROGRAM = "bactopia citations"
 DESCRIPTION = 'Prints the citations of datasets and tools used by Bactopia'
+
 
 def validate_args(bactopia_repo):
     bactopia_citations = f'{bactopia_repo}/data/bactopia-datasets-software.txt'

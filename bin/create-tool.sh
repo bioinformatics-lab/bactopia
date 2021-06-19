@@ -2,7 +2,7 @@
 # build-containers
 #
 # Create a blank tool.
-VERSION=1.6.0
+VERSION=1.7.1
 
 if [[ $# == 0 ]]; then
     echo ""
@@ -26,7 +26,6 @@ fi
 if [ ! -d "${BACTOPIA_DIR}/tools/${TOOL}" ]; then
     cp -r ${BACTOPIA_DIR}/tools/.skeleton ${BACTOPIA_DIR}/tools/${TOOL}
     sed -i -r 's/TOOL_NAME/'"${TOOL}"'/' ${BACTOPIA_DIR}/tools/${TOOL}/Dockerfile
-    sed -i -r 's/TOOL_NAME/'"${TOOL}"'/' ${BACTOPIA_DIR}/tools/${TOOL}/Singularity
     sed -i -r 's/TOOL_NAME/'"${TOOL}"'/' ${BACTOPIA_DIR}/tools/${TOOL}/nextflow.config
     sed -i -r 's/DESCRIPTION/'"${DESCRIPTION}"'/' ${BACTOPIA_DIR}/tools/${TOOL}/nextflow.config
 else
